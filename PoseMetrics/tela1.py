@@ -87,7 +87,7 @@ if st.session_state.running:
             if results.pose_landmarks:
                 mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
-            video_placeholder.image(image, channels="BGR", use_column_width=True)
+            video_placeholder.image(image, channels="BGR", use_container_width=True)
 
             time.sleep(0.1)
 
