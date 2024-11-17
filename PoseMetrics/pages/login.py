@@ -17,6 +17,8 @@ def exibir_login():
             data = response.json()
             if data["status"] == "success":
                 st.success("Login realizado com sucesso!")
+                st.session_state["email_profissional"] = email
+
                 st.session_state.pagina_atual = "home"  
                 st.rerun()
             else:

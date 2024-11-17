@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from passlib.hash import bcrypt
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from app.database import get_db_connection
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -11,15 +12,6 @@ class User(BaseModel):
     email: str
     senha: str
 
-def get_db_connection():
-    conn = psycopg2.connect(
-        dbname="PoseMetrics",  
-        user="postgres",  
-        password="18080812", 
-        host="localhost", 
-        port="5433" 
-    )
-    return conn
 
 @router.post("/cadastro")
 def register(user: User):
