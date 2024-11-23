@@ -32,15 +32,16 @@ def exibir_home():
     # Barra lateral de navegação
     with st.sidebar:
     # Exibir logo e texto alinhados
+        st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
         st.markdown(
-            """
+            f"""
             <div style="display: flex; align-items: center; justify-content: center;">
-                <img src="https://via.placeholder.com/50" style="width:50px; margin-right:10px;">
                 <h2 style="margin: 0;">Pose Metrics</h2>
             </div>
             """,
             unsafe_allow_html=True,
         )
+        
         st.markdown("---")  # Linha de separação
 
 
