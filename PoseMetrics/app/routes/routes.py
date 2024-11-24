@@ -28,9 +28,9 @@ def obter_pacientes(email_profissional: str):
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
-                SELECT nome, prox_sessao, hora_prox_sessao
+                SELECT nome, telefone, ultima_sessao, prox_sessao, hora_prox_sessao
                 FROM Pacientes
-                WHERE atendente = %s
+                WHERE atendente = %s and status = true
                 ORDER BY prox_sessao ASC
                 LIMIT 10
             """, (email_profissional,))

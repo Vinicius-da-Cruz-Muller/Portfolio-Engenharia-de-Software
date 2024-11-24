@@ -4,13 +4,16 @@ from login import exibir_login
 from cadastro import exibir_cadastro
 from home import exibir_home 
 from indicadores import exibir_indicadores
+from usuarios import exibir_usuarios
+from contato import exibir_contato
+from sobre import exibir_portfolio
 
 
 
 st.set_page_config(
     page_title="Pose Metrics",
     page_icon="posemetrics_logo.png",
-    layout="wide",  # Utiliza toda a largura da tela
+    layout="wide", 
     initial_sidebar_state="expanded",
 )
 
@@ -25,3 +28,9 @@ elif st.session_state.pagina_atual == "home":
     exibir_home()
 elif st.session_state.pagina_atual == "indicadores":
     exibir_indicadores()
+elif st.session_state.pagina_atual == "usuarios":
+    exibir_usuarios()
+elif st.session_state.pagina_atual == "contato":
+    exibir_contato()
+elif st.session_state.pagina_atual == "sobre":
+    exibir_portfolio()

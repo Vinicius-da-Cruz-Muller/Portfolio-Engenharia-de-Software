@@ -1,13 +1,11 @@
 import streamlit as st
 import requests
+import pandas as pd
 from streamlit_option_menu import option_menu
-from indicadores import exibir_indicadores
+import webbrowser
 
 
 def exibir_home():
-    
-    # st.set_page_config(page_title="Pose Metrics - Home", layout="wide", page_icon = "poseMetrics_logo.png")
-
     st.markdown(
     """
     <style>
@@ -19,19 +17,20 @@ def exibir_home():
     """,
     unsafe_allow_html=True,
 )
+    
+    
 
     with st.sidebar:
-    # Exibir logo e texto alinhados
         st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
         selected = option_menu(
             menu_title = None,
-            options = ["Home", "Indicadores"],
-            icons=['house', 'file-bar-graph'], 
+            options = ["Home", "Indicadores", "Usuários", "Contato", "Sobre"],
+            icons=['house', 'graph-up-arrow', 'people', 'github'], 
             # menu_icon="menu-button-wide-fill", 
             # default_index=0
             styles={
-            "container": {"background-color": "#4E937A60"},  # Fundo do container do menu
-            "icon": {"color": "#A22C29", "font-size": "20px"},  # Estilo dos ícones
+            "container": {"background-color": "#4E937A60"},  
+            "icon": {"color": "#A22C29", "font-size": "20px"},  
             "nav-link": {
                 "font-size": "20px",
                 "text-align": "left",
@@ -47,17 +46,26 @@ def exibir_home():
     if selected == "Indicadores":
         st.session_state.pagina_atual = "indicadores"  
         st.rerun()
+    if selected == "Usuários":
+        st.session_state.pagina_atual = "usuarios"  
+        st.rerun()
+    if selected == "Contato":
+        st.session_state.pagina_atual = "contato"
+        st.rerun()
+    if selected == "Sobre":
+        st.session_state.pagina_atual = "sobre"
+        st.rerun()
+    # if selected == "Sobre":
+    #     github_url = "https://github.com/Vinicius-da-Cruz-Muller"  # Substitua pelo link do seu GitHub
+    #     webbrowser.open_new_tab(github_url)
+
     
 
-    # Dividindo o layout superior em duas colunas
     col1, col2 = st.columns([0.8, 0.2])
 
-    # Coluna da esquerda: Nome e logo
+    
     with col1:
-        # st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
-        # st.markdown("<h1 style='font-size:20px; margin-top:0;'>Pose Metrics</h1>", unsafe_allow_html=True)
 
-    # Obtem o e-mail do profissional logado
         profissional_email = st.session_state.get("email_profissional", None)
 
         if not profissional_email:
@@ -89,12 +97,45 @@ def exibir_home():
         if response_pacientes.status_code == 200:
             pacientes = response_pacientes.json()
             if pacientes:
-                st.subheader("Próximos Pacientes:")
-                for paciente in pacientes:
-                    st.write(
-                        f"- {paciente['nome']} "
-                        f"(Próxima Sessão: {paciente['prox_sessao']}, Hora: {paciente['hora_prox_sessao']})"
-                    )
+                df_pacientes = pd.DataFrame(pacientes)
+                st.markdown(
+                    """
+                    <style>
+                        /* Personalizando a tabela */
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            background-color: #4E937A60;  
+                        }
+                        table, th, td {
+                            border: 1px solid #004B87;
+                        }
+                        th {
+                            font-weight: bold;
+                            color: black;  
+                            text-align: left;
+                            padding: 8px;
+                        }
+                        td {
+                            padding: 8px;
+                            text-align: left;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f2f2f2;
+                        }
+                        tr:hover {
+                            background-color: #ddd;
+                        }
+                    </style>
+                    """, unsafe_allow_html=True)
+                st.subheader("Seus próximos atendimentos:")
+                table_html = df_pacientes.to_html(classes='streamlit-table', index=False)
+                st.markdown(table_html, unsafe_allow_html=True)
+                # for paciente in pacientes:
+                #     st.write(
+                #         f"- {paciente['nome']} "
+                #         f"(Próxima Sessão: {paciente['prox_sessao']}, Hora: {paciente['hora_prox_sessao']})"
+                #     )
             else:
                 st.write("Não há pacientes agendados para este profissional.")
         else:

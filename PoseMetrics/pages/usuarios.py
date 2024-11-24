@@ -3,5 +3,5 @@ import requests
 
 
 
-def exibir_indicadores():
+def exibir_usuarios():
     st.title("Tela Inicial")
