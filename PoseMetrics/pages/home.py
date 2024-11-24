@@ -24,8 +24,8 @@ def exibir_home():
         st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
         selected = option_menu(
             menu_title = None,
-            options = ["Home", "Indicadores", "Usuários", "Contato", "Sobre"],
-            icons=['house', 'graph-up-arrow', 'people', 'github'], 
+            options = ["Home", "Indicadores", "Usuários", "Relatórios", "Contato", "Sobre"],
+            icons=['house', 'graph-up-arrow', 'people', 'bar-chart', 'github', 'question-circle'], 
             # menu_icon="menu-button-wide-fill", 
             # default_index=0
             styles={
@@ -145,9 +145,11 @@ def exibir_home():
     with col2:
         st.markdown(
             f"""
-            <div style="display: flex; align-items: center; justify-content: flex-end;">
-                <p style="font-size:18px; margin: 0; padding-right: 10px;">{nome_profissional}</p>
-                <img src="{foto_profissional}" style="border-radius:50%; width:50px; height:50px;">
+            <div style="background-color: #f0f0f0; padding: 10px; border-radius: 10px;">
+                <div style="display: flex; align-items: center; justify-content: flex-end;">
+                    <p style="font-size:18px; margin: 0; padding-right: 10px;">{nome_profissional}</p>
+                    <img src="{foto_profissional}" style="border-radius:50%; width:50px; height:50px;">
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
