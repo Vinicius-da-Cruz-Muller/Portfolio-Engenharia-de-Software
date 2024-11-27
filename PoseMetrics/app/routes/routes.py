@@ -9,6 +9,20 @@ from app.database import get_db_connection
 
 router = APIRouter(prefix="/home", tags=["home"])
 
+class Paciente(BaseModel):
+    id: int
+    nome: str
+    telefone: Optional[str] = None
+    email: Optional[str] = None
+    endereco: Optional[str] = None
+    estado_civil: Optional[str] = None
+    data_nascimento: Optional[str] = None
+    condicao: Optional[str] = None
+    inicio_tratamento: Optional[str] = None
+    fim_tratamento: Optional[str] = None
+    prox_sessao: Optional[str] = None
+    hora_prox_sessao: Optional[str] = None
+
 class PacienteUpdate(BaseModel):
     nome: Optional[str] = None
     telefone: Optional[str] = None
@@ -119,19 +133,70 @@ def editar_paciente(paciente_id: int, paciente: PacienteUpdate):
     finally:
         conn.close()
 
-@router.post("/home/adicionar_paciente")
+@router.post("/adicionar_paciente")
 def adicionar_paciente(paciente: dict):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO Pacientes (nome, telefone, prox_sessao, atendente)
-                VALUES (%s, %s, %s, %s)
-            """, (paciente['nome'], paciente['telefone'], paciente['prox_sessao'], paciente['atendente']))
+                INSERT INTO Pacientes 
+                (nome, telefone, email, estado_civil, data_nascimento, endereco, condicao, inicio_tratamento, fim_tratamento, prox_sessao, hora_prox_sessao, atendente)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                paciente['nome'], 
+                paciente['telefone'], 
+                paciente['email'], 
+                paciente['estado_civil'], 
+                paciente['data_nascimento'], 
+                paciente['endereco'], 
+                paciente['condicao'], 
+                paciente['inicio_tratamento'], 
+                paciente['fim_tratamento'], 
+                paciente['prox_sessao'], 
+                paciente['hora_prox_sessao'], 
+                paciente['atendente']
+            ))
             conn.commit()
         return {"message": "Paciente adicionado com sucesso."}
     except Exception as e:
         conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.get("/paciente/{paciente_id}")
+def get_paciente(paciente_id: int):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, nome, telefone, email, endereco, estado_civil, data_nascimento, condicao, 
+                       inicio_tratamento, fim_tratamento, prox_sessao, hora_prox_sessao
+                FROM Pacientes
+                WHERE id = %s
+            """, (paciente_id,))
+            paciente = cur.fetchone()
+
+        if not paciente:
+            raise HTTPException(status_code=404, detail="Paciente não encontrado")
+
+        # Retornar os dados como um dicionário
+        return {
+            "id": paciente[0],
+            "nome": paciente[1],
+            "telefone": paciente[2],
+            "email": paciente[3],
+            "endereco": paciente[4],
+            "estado_civil": paciente[5],
+            "data_nascimento": paciente[6],
+            "condicao": paciente[7],
+            "inicio_tratamento": paciente[8],
+            "fim_tratamento": paciente[9],
+            "prox_sessao": paciente[10],
+            "hora_prox_sessao": paciente[11],
+        }
+    except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()

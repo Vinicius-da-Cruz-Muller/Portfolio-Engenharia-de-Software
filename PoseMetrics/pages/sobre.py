@@ -3,41 +3,47 @@ from streamlit_option_menu import option_menu
 
 def exibir_portfolio():
 
-    with st.sidebar:
-        st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
-        selected = option_menu(
-            menu_title = None,
-            options = ["Home", "Indicadores", "Usuários", "Contato", "Sobre"],
-            icons=['house', 'graph-up-arrow', 'people', 'github'], 
-            # menu_icon="menu-button-wide-fill", 
-            default_index=3,
-            styles={
-            "container": {"background-color": "#4E937A60"},  
-            "icon": {"color": "#A22C29", "font-size": "20px"},  
-            "nav-link": {
-                "font-size": "20px",
-                "text-align": "left",
-                "margin": "10px",
-                "--hover-color": "#A22C2960",
-            },
-            "nav-link-selected": {"background-color": "#4E937A90", "color": "white"},
-        },
-        )
+    # with st.sidebar:
+    #     st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
+    #     selected = option_menu(
+    #         menu_title = None,
+    #         options = ["Home", "Indicadores", "Pacientes", "Consulta", "Relatórios", "Contato", "Sobre"],
+    #         icons=['house', 'graph-up-arrow', 'people', 'calendar2-heart', 'bar-chart', 'github', 'question-circle'],
+    #         # menu_icon="menu-button-wide-fill", 
+    #         default_index=3,
+    #         styles={
+    #         "container": {"background-color": "#4E937A60"},  
+    #         "icon": {"color": "#A22C29", "font-size": "20px"},  
+    #         "nav-link": {
+    #             "font-size": "20px",
+    #             "text-align": "left",
+    #             "margin": "10px",
+    #             "--hover-color": "#A22C2960",
+    #         },
+    #         "nav-link-selected": {"background-color": "#4E937A90", "color": "white"},
+    #     },
+    #     )
 
-    if selected == "Home":
-        st.session_state.pagina_atual = "home"  
-        st.rerun()
-    if selected == "Indicadores":
-        st.session_state.pagina_atual = "indicadores"  
-        st.rerun()
-    if selected == "Usuários":
-        st.session_state.pagina_atual = "usuarios"  
-        st.rerun()
-    if selected == "Contato":
-        st.session_state.pagina_atual = "contato"
-        st.rerun()
-    if selected == "Sobre":
-        pass
+    # if selected == "Home":
+    #     st.session_state.pagina_atual = "home"  
+    #     st.rerun()
+    # if selected == "Indicadores":
+    #     st.session_state.pagina_atual = "indicadores"  
+    #     st.rerun()
+    # if selected == "Pacientes":
+    #     st.session_state.pagina_atual = "usuarios"  
+    #     st.rerun()
+    # if selected == "Consulta":
+    #     st.session_state.pagina_atual = "sessao"  
+    #     st.rerun()
+    # if selected == "Relatórios":
+    #     st.session_state.pagina_atual = "relatorios"  
+    #     st.rerun()
+    # if selected == "Contato":
+    #     st.session_state.pagina_atual = "contato"
+    #     st.rerun()
+    # if selected == "Sobre":
+    #     pass
 
 
     st.title("Portfólio Engenharia de Software")
