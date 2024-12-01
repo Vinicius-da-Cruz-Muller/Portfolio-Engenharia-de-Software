@@ -24,8 +24,8 @@ def exibir_home():
         st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
         selected = option_menu(
             menu_title = None,
-            options = ["Home", "Indicadores", "Pacientes", "Consulta", "Relatórios", "Contato", "Sobre"],
-            icons=['house', 'graph-up-arrow', 'people', 'calendar2-heart', 'bar-chart', 'github', 'question-circle'], 
+            options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
+            icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
             # menu_icon="menu-button-wide-fill", 
             # default_index=0
             styles={
@@ -46,14 +46,20 @@ def exibir_home():
     if selected == "Indicadores":
         st.session_state.pagina_atual = "indicadores"  
         st.rerun()
+    if selected == "Exercícios":
+        st.session_state.pagina_atual = "exercicios"  
+        st.rerun()
     if selected == "Pacientes":
-        st.session_state.pagina_atual = "usuarios"  
+        st.session_state.pagina_atual = "pacientes"  
         st.rerun()
     if selected == "Consulta":
-        st.session_state.pagina_atual = "sessao"  
+        st.session_state.pagina_atual = "consulta"  
         st.rerun()
     if selected == "Relatórios":
         st.session_state.pagina_atual = "relatorios"  
+        st.rerun()
+    if selected == "Configurações":
+        st.session_state.pagina_atual = "configuracoes"  
         st.rerun()
     if selected == "Contato":
         st.session_state.pagina_atual = "contato"

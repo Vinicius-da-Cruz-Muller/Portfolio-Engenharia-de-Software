@@ -5,7 +5,7 @@ from streamlit_option_menu import option_menu
 import webbrowser
 
 
-def exibir_relatorio():
+def exibir_configuracoes():
     st.markdown(
     """
     <style>
@@ -57,10 +57,10 @@ def exibir_relatorio():
         st.session_state.pagina_atual = "consulta"  
         st.rerun()
     if selected == "Relatórios":
-        pass
-    if selected == "Configurações":
-        st.session_state.pagina_atual = "configuracoes"  
+        st.session_state.pagina_atual = "relatorios"  
         st.rerun()
+    if selected == "Configurações":
+        pass
     if selected == "Contato":
         st.session_state.pagina_atual = "contato"
         st.rerun()
@@ -103,7 +103,7 @@ def exibir_relatorio():
             return
 
         
-        st.title("Relatórios")
+        st.title("Configurações")
         st.write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
     with col2:
         st.markdown(

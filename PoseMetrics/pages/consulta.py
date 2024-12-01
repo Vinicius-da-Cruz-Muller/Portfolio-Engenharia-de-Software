@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 import time
 
-def pagina_sessao():
+def pagina_consulta():
     st.markdown(
     """
     <style>
@@ -26,8 +26,8 @@ def pagina_sessao():
         st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
         selected = option_menu(
             menu_title = None,
-            options = ["Home", "Indicadores", "Pacientes", "Consulta", "Relatórios", "Contato", "Sobre"],
-            icons=['house', 'graph-up-arrow', 'people', 'calendar2-heart', 'bar-chart', 'github', 'question-circle'], 
+            options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
+            icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
             # menu_icon="menu-button-wide-fill", 
             # default_index=0
             styles={
@@ -44,18 +44,24 @@ def pagina_sessao():
         )
 
     if selected == "Home":
-        st.session_state.pagina_atual = "home"
+        st.session_state.pagina_atual = "home"  
         st.rerun()
     if selected == "Indicadores":
         st.session_state.pagina_atual = "indicadores"  
         st.rerun()
+    if selected == "Exercícios":
+        st.session_state.pagina_atual = "exercicios"  
+        st.rerun()
     if selected == "Pacientes":
-        st.session_state.pagina_atual = "usuarios"  
+        st.session_state.pagina_atual = "pacientes"  
         st.rerun()
     if selected == "Consulta":
         pass
     if selected == "Relatórios":
         st.session_state.pagina_atual = "relatorios"  
+        st.rerun()
+    if selected == "Configurações":
+        st.session_state.pagina_atual = "configuracoes"  
         st.rerun()
     if selected == "Contato":
         st.session_state.pagina_atual = "contato"

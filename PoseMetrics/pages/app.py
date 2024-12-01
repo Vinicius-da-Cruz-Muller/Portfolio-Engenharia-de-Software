@@ -5,11 +5,13 @@ from login import exibir_login
 from cadastro import exibir_cadastro
 from home import exibir_home 
 from indicadores import exibir_indicadores
-from usuarios import exibir_usuarios
+from exercicios import exibir_exercicios
+from pacientes import exibir_pacientes
 from contato import exibir_contato
 from sobre import exibir_portfolio
-from sessao import pagina_sessao
+from consulta import pagina_consulta
 from relatorios import exibir_relatorio
+from configuracoes import exibir_configuracoes
 
 
 
@@ -31,12 +33,16 @@ if st.session_state.pagina_atual == "home":
     exibir_home()
 if st.session_state.pagina_atual == "indicadores":
     exibir_indicadores()
-if st.session_state.pagina_atual == "usuarios":
-    exibir_usuarios()
-if st.session_state.pagina_atual == "sessao":
-    pagina_sessao()
+if st.session_state.pagina_atual == "exercicios":
+    exibir_exercicios()
+if st.session_state.pagina_atual == "pacientes":
+    exibir_pacientes()
+if st.session_state.pagina_atual == "consulta":
+    pagina_consulta()
 if st.session_state.pagina_atual == "relatorios":
     exibir_relatorio()
+if st.session_state.pagina_atual == "configuracoes":
+    exibir_configuracoes()
 if st.session_state.pagina_atual == "contato":
     exibir_contato()
 if st.session_state.pagina_atual == "sobre":
