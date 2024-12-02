@@ -102,28 +102,57 @@ def pagina_consulta():
             st.error("Erro ao carregar as informações do profissional.")
             return
         
+        col_pacientes, col_altura, col_massa = st.columns([0.6, 0.2, 0.2])
 
-        response_pacientes = requests.get(
-            f"http://127.0.0.1:8000/home/{profissional_email}/listar_pacientes"
-        )
+        with col_pacientes:
 
-        if response_pacientes.status_code == 200:
-            pacientes = response_pacientes.json()
-            if pacientes:
-                df_pacientes = pd.DataFrame(pacientes)
-                
-                paciente_nome = st.selectbox("Selecione um paciente", df_pacientes['nome'])
-        #         paciente_id = df_pacientes["id"]
-                
-        #         # paciente_selecionado = df_pacientes[df_pacientes['nome'] == paciente_nome].iloc[0]
-        #         # editar_paciente(paciente_selecionado)
+            response_pacientes = requests.get(
+                f"http://127.0.0.1:8000/home/{profissional_email}/listar_pacientes"
+            )
+
+            if response_pacientes.status_code == 200:
+                pacientes = response_pacientes.json()
+                if pacientes:
+                    df_pacientes = pd.DataFrame(pacientes)
                     
+                    paciente_nome = st.selectbox("Selecione um paciente", df_pacientes['nome'])
+            #         paciente_id = df_pacientes["id"]
+                    
+            #         # paciente_selecionado = df_pacientes[df_pacientes['nome'] == paciente_nome].iloc[0]
+            #         # editar_paciente(paciente_selecionado)
+                        
+                else:
+                    st.write("Não há pacientes agendados para este profissional.")
             else:
-                st.write("Não há pacientes agendados para este profissional.")
-        else:
-            st.error("Erro ao carregar a lista de pacientes.")
+                st.error("Erro ao carregar a lista de pacientes.")
+        
+        with col_altura:
+            altura = st.number_input("Altura atual (em cm):", min_value=0.0, step=0.1, format="%.2f")
+        
+        with col_massa:
+            massa = st.number_input("Peso atual (em kg):", min_value=0.0, step=0.1, format="%.2f")
 
+        
+        col_exercicios, col_equipamento, col_peso = st.columns([0.6, 0.2, 0.2])
+        with col_exercicios:
+            response_exercicios = requests.get(f"http://127.0.0.1:8000/home/{profissional_email}/exercicios")
+            if response_exercicios.status_code == 200:
+                exercicios = response_exercicios.json()
+                exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
+            else:
+                st.error("Erro ao carregar a lista de exercícios.")
+                return
+            
+        with col_equipamento:
+            opcoes = ["Halter", "Elástico", "Barra", "Polia"]
 
+            equip = st.selectbox("Escolha um equipamento", opcoes)
+
+        with col_peso:
+            peso = st.number_input("Peso (em kg):", min_value=0.0, step=0.1, format="%.2f")
+
+        
+        
 
         # Obter o ID do paciente da sessão
         # paciente_id = st.session_state.get("paciente_id", None)
@@ -148,9 +177,16 @@ def pagina_consulta():
 
         st.subheader("Monitoramento de Exercício")
 
-        start_button = st.button("Iniciar Captura")
-        stop_button = st.button("Parar Captura")
-        st.button("Encerrar Sessão", on_click=encerrar_sessao)
+        col6, col7, col8 = st.columns([0.33, 0.33, 0.34])
+
+        with col6:
+            start_button = st.button("Iniciar sessão")
+
+        with col7:
+            stop_button = st.button("Concluir sessão")
+
+        with col8:
+            cancel_button = st.button("Cancelar sessão")
 
         mp_pose = mp.solutions.pose
         mp_drawing = mp.solutions.drawing_utils
@@ -163,6 +199,9 @@ def pagina_consulta():
 
         if stop_button:
             st.session_state.running = False
+
+        if cancel_button:
+            cancela_sessao()
 
         if st.session_state.running:
             cap = cv2.VideoCapture(0)
@@ -183,6 +222,8 @@ def pagina_consulta():
                         st.write("Erro ao capturar vídeo.")
                         break
 
+                    frame = resize_frame(frame, 640, 480)
+
                     # Recolorir imagem para RGB
                     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     image.flags.writeable = False
@@ -201,7 +242,7 @@ def pagina_consulta():
                         angle = calculate_angle(shoulder, elbow, wrist)
 
                         # Lógica de contagem das repetições
-                        if angle > 160:
+                        if angle > 80:
                             stage = "baixo"
                         if angle < 30 and stage == 'baixo':
                             stage = "cima"
@@ -237,10 +278,10 @@ def pagina_consulta():
             unsafe_allow_html=True,
         )
 
-def encerrar_sessao():
-    # Função para encerrar a sessão
-    st.session_state.pagina_atual = "usuarios"
-    st.rerun()
+# def encerrar_sessao():
+#     # Função para encerrar a sessão
+#     st.session_state.pagina_atual = "usuarios"
+#     st.rerun()
 
 
 def calculate_angle(a, b, c):
@@ -255,3 +296,10 @@ def calculate_angle(a, b, c):
         angle = 360 - angle
 
     return angle
+
+    # Função para redimensionar frames
+def resize_frame(frame, width, height):
+    return cv2.resize(frame, (width, height))
+
+def cancela_sessao():
+    pass

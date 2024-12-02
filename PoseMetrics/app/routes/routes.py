@@ -200,3 +200,28 @@ def get_paciente(paciente_id: int):
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()
+
+
+
+@router.get("/{email_profissional}/exercicios")
+def listar_exercicios():
+    conn = get_db_connection()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                SELECT id, nome, lado, descricao, angulo_minimo_exercicio, angulo_maximo_exercicio
+                FROM Exercicios
+                ORDER BY nome ASC
+            """)
+            exercicios = cur.fetchall()
+
+        if not exercicios:
+            raise HTTPException(status_code=404, detail="Nenhum exercício encontrado")
+
+        return exercicios
+    finally:
+        conn.close()
+
+
+
+

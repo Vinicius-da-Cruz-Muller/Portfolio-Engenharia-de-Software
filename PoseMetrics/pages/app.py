@@ -23,7 +23,7 @@ st.set_page_config(
 )
 
 if "pagina_atual" not in st.session_state:
-    st.session_state.pagina_atual = "home"  
+    st.session_state.pagina_atual = "login"  
 
 if st.session_state.pagina_atual == "login":
     exibir_login()
