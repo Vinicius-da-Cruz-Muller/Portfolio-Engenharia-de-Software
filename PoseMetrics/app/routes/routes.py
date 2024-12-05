@@ -133,7 +133,7 @@ def editar_paciente(paciente_id: int, paciente: PacienteUpdate):
     finally:
         conn.close()
 
-@router.post("/adicionar_paciente")
+@router.post("/{email_profissional}/adicionar_paciente")
 def adicionar_paciente(paciente: dict):
     conn = get_db_connection()
     try:

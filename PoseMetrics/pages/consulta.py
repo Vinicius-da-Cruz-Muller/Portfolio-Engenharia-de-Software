@@ -204,6 +204,25 @@ def pagina_consulta():
             cancela_sessao()
 
         if st.session_state.running:
+
+            col9, col10, col11 = st.columns([0.33, 0.33, 0.34])
+
+            with col9:
+                start_serie_button = st.button("Iniciar Série")
+            with col10:
+                cancel_serie_button = st.button("Cancelar Série")
+            with col11:
+                save_serie_button = st.button("Gravar Série")
+
+            if start_serie_button:
+                st.write("Série iniciada!")
+                # start_time = None
+                # serie_data = []  # Substituir pela lógica da série
+            if cancel_serie_button:
+                st.write("Série cancelada!")  # Substituir pela lógica de cancelamento
+            if save_serie_button:
+                st.write("Série gravada!")  # Substituir pela lógica de gravação
+
             cap = cv2.VideoCapture(0)
 
             counter = 0 
@@ -213,6 +232,7 @@ def pagina_consulta():
 
             rep_counter = st.empty()
             stage_text = st.empty()
+            # serie_text = st.empty()
 
             with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
                 while cap.isOpened() and st.session_state.running:
@@ -240,30 +260,45 @@ def pagina_consulta():
                         wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
 
                         angle = calculate_angle(shoulder, elbow, wrist)
+                        # current_time = time.time() - start_time
 
                         # Lógica de contagem das repetições
                         if angle > 80:
                             stage = "baixo"
+                            # serie_data.append({
+                            #     "Tempo (s)": round(current_time, 2),
+                            #     "Ângulo": round(angle, 2),
+                            #     "Estágio": stage
+                            # })
                         if angle < 30 and stage == 'baixo':
                             stage = "cima"
                             counter += 1
+                            # serie_data.append({
+                            #     "Tempo (s)": round(current_time, 2),
+                            #     "Ângulo": round(angle, 2),
+                            #     "Estágio": stage
+                            # })
+
+                        
 
                         rep_counter.write(f'Contagem: {counter}')
                         stage_text.write(f'Estágio: {stage}')
+                        # serie_text.write(f'Série: {serie_data}')
 
                     except Exception as e:
-                        st.write("Erro:", e)
+                        # st.write("Erro:", e)
+                        pass
 
                     if results.pose_landmarks:
                         mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
-                    video_placeholder.image(image, channels="BGR", use_container_width=True)
+                    video_placeholder.image(image, channels="BGR", width = 800)
 
                     time.sleep(0.1)
 
             cap.release()
         else:
-            st.write("Pressione 'Iniciar Captura' para começar.")
+            st.write("Pressione 'Iniciar sessão' para começar.")
 
     with col2:
         st.markdown(

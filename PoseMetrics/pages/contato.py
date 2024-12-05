@@ -108,15 +108,7 @@ def exibir_contato():
             """,
             unsafe_allow_html=True,
         )
-        st.markdown(
-            """
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="contact-button instagram">
-                Instagram
-            </a>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            """,
-            unsafe_allow_html=True,
-        )
+
 
     with col2:
         st.markdown(
@@ -128,15 +120,7 @@ def exibir_contato():
             """,
             unsafe_allow_html=True,
         )
-        st.markdown(
-            """
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="contact-button linkedin">
-                LinkedIn
-            </a>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            """,
-            unsafe_allow_html=True,
-        )
+
 
     with col3:
         st.markdown(
@@ -148,12 +132,4 @@ def exibir_contato():
             """,
             unsafe_allow_html=True,
         )
-        st.markdown(
-            """
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="contact-button github">
-                GitHub
-            </a>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            """,
-            unsafe_allow_html=True,
-        )
+

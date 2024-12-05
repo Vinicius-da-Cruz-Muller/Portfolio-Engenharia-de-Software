@@ -12,6 +12,7 @@ from sobre import exibir_portfolio
 from consulta import pagina_consulta
 from relatorios import exibir_relatorio
 from configuracoes import exibir_configuracoes
+from adicionar import adicionar_novo_paciente
 
 
 
@@ -23,7 +24,7 @@ st.set_page_config(
 )
 
 if "pagina_atual" not in st.session_state:
-    st.session_state.pagina_atual = "login"  
+    st.session_state.pagina_atual = "home"  
 
 if st.session_state.pagina_atual == "login":
     exibir_login()
@@ -37,6 +38,8 @@ if st.session_state.pagina_atual == "exercicios":
     exibir_exercicios()
 if st.session_state.pagina_atual == "pacientes":
     exibir_pacientes()
+if st.session_state.pagina_atual == "adicionar":
+    adicionar_novo_paciente()
 if st.session_state.pagina_atual == "consulta":
     pagina_consulta()
 if st.session_state.pagina_atual == "relatorios":

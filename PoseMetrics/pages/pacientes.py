@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 from streamlit_option_menu import option_menu
+from adicionar import adicionar_novo_paciente
 
 
 def exibir_pacientes():
@@ -128,6 +129,11 @@ def exibir_pacientes():
         )
 
 
+
+
+
+
+
 def editar_paciente(paciente):
     
     if "modo_edicao" not in st.session_state:
@@ -178,6 +184,14 @@ def editar_paciente(paciente):
     else:
         exibir_ficha_paciente(paciente)
 
+
+
+
+
+
+
+
+
 def exibir_ficha_paciente(paciente):
     st.subheader("Ficha do Paciente")
 
@@ -204,14 +218,15 @@ def exibir_ficha_paciente(paciente):
 
     # Botões de ações
     st.divider()
-    col_buttons = st.columns([1, 1, 1])
-    with col_buttons[0]:
-        if st.button("Editar paciente", key="editar_paciente"):
+    col_edit, col_add = st.columns([0.5, 0.5])
+    with col_edit:
+        if st.button("Editar paciente"):
             st.session_state["modo_edicao"] = True
 
-    with col_buttons[1]:
-        if st.button("Adicionar paciente", key="adicionar_paciente"):
-            adicionar_novo_paciente()
+    with col_add:
+        if st.button("Adicionar paciente"):
+            st.session_state.pagina_atual = "adicionar"  
+            st.rerun()
 
     # with col_buttons[2]:
     #     if st.button("Iniciar sessão", key="iniciar_sessao"):
@@ -223,52 +238,3 @@ def exibir_ficha_paciente(paciente):
 
 
 
-def adicionar_novo_paciente():
-    st.subheader("Adicionar Novo Paciente")
-    with st.form(key = "add_patient", clear_on_submit=False, enter_to_submit=False, border=True):
-        nome = st.text_input("Nome")
-        telefone = st.text_input("Telefone")
-        email = st.text_input("E-mail")
-        estado_civil = st.text_input("Estado Civil")
-        data_nascimento = st.date_input("Data de Nascimento")
-        endereco = st.text_input("Endereço")
-        condicao = st.text_input("Condição do Paciente")
-        inicio_tratamento = st.date_input("Início do Tratamento")
-        fim_tratamento = st.date_input("Fim do Tratamento")
-        prox_sessao = st.date_input("Próxima Sessão")
-        hora_prox_sessao = st.text_input("Horário da Próxima Sessão (HH:MM)")
-        
-        # Obter o e-mail do profissional logado para vincular ao paciente
-        # profissional_email = st.session_state.get("email_profissional", None)
-        profissional_email = "vinivini@gmail.com"
-
-        submitted = st.form_submit_button(label = "Adicionar")
-        
-        if submitted:
-            st.success("Sim")
-            # Preparar os dados para envio
-            paciente_data = {
-                "nome": nome,
-                "telefone": telefone,
-                "email": email,
-                "estado_civil": estado_civil,
-                "data_nascimento": str(data_nascimento),
-                "endereco": endereco,
-                "condicao": condicao,
-                "inicio_tratamento": str(inicio_tratamento),
-                "fim_tratamento": str(fim_tratamento),
-                "prox_sessao": str(prox_sessao),
-                "hora_prox_sessao": hora_prox_sessao,
-                "atendente": profissional_email
-            }
-
-            # Fazer a requisição para a API
-            response = requests.post(
-                "http://127.0.0.1:8000/home/adicionar_paciente",
-                json=paciente_data,
-            )
-
-            if response.status_code == 200:
-                st.success("Paciente adicionado com sucesso.")
-            else:
-                st.error("Erro ao adicionar paciente.")
