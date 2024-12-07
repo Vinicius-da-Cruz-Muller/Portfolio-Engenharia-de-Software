@@ -260,6 +260,10 @@ def pagina_consulta():
                         wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
 
                         angle = calculate_angle(shoulder, elbow, wrist)
+
+                        cv2.putText(image, f"Angulo: {int(angle)}", 
+                            (int(elbow[0] * frame.shape[1]), int(elbow[1] * frame.shape[0] - 20)), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
                         # current_time = time.time() - start_time
 
                         # Lógica de contagem das repetições
@@ -278,7 +282,10 @@ def pagina_consulta():
                             #     "Ângulo": round(angle, 2),
                             #     "Estágio": stage
                             # })
-
+                        # cv2.putText(image, f"Repeticoes: {counter}", (10, 50), 
+                        #     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
+                        # cv2.putText(image, f"Estagio: {stage}", (10, 100), 
+                        #     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
                         
 
                         rep_counter.write(f'Contagem: {counter}')

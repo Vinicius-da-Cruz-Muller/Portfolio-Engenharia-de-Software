@@ -1,10 +1,13 @@
 from fastapi import APIRouter, HTTPException
+from fastapi import UploadFile, Form
 from typing import Optional
 from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from app.routes.auth import router as auth_router
 from app.database import get_db_connection
+
+import base64
 
 
 router = APIRouter(prefix="/home", tags=["home"])
@@ -35,6 +38,33 @@ class PacienteUpdate(BaseModel):
     fim_tratamento: Optional[str] = None
     prox_sessao: Optional[str] = None
     hora_prox_sessao: Optional[str] = None
+
+class ExercicioUpdate(BaseModel):
+    nome: Optional[str] = None
+    grupo_muscular: Optional[str] = None
+    lado: Optional[str] = None
+    x1: Optional[float] = None
+    x2: Optional[float] = None
+    x3: Optional[float] = None
+    angulo_minimo_exercicio: Optional[int] = None
+    angulo_maximo_exercicio: Optional[int] = None
+    descricao: Optional[str] = None
+    tipo: Optional[str] = None
+
+class ExercicioCreate(BaseModel):
+    nome: str
+    grupo_muscular: str
+    lado: str
+    x1: float
+    x2: float
+    x3: float
+    angulo_minimo_exercicio: int
+    angulo_maximo_exercicio: int
+    descricao: str
+    tipo: str
+
+
+
 
 @router.get("/{email_profissional}")
 def obter_profissional(email_profissional: str):
@@ -73,9 +103,6 @@ def obter_pacientes(email_profissional: str):
 
 
 
-
-
-
 @router.get("/{email_profissional}/listar_pacientes")
 def obter_pacientes(email_profissional: str):
     conn = get_db_connection()
@@ -94,6 +121,8 @@ def obter_pacientes(email_profissional: str):
         return pacientes
     finally:
         conn.close()
+
+
 
 
 @router.put("/{paciente_id}")
@@ -133,28 +162,49 @@ def editar_paciente(paciente_id: int, paciente: PacienteUpdate):
     finally:
         conn.close()
 
+
+
+
+
 @router.post("/{email_profissional}/adicionar_paciente")
-def adicionar_paciente(paciente: dict):
+async def adicionar_paciente(
+    nome: str = Form(...),
+    telefone: str = Form(...),
+    email: str = Form(...),
+    estado_civil: str = Form(...),
+    data_nascimento: str = Form(...),
+    endereco: str = Form(...),
+    condicao: str = Form(...),
+    inicio_tratamento: str = Form(...),
+    fim_tratamento: str = Form(...),
+    prox_sessao: str = Form(...),
+    hora_prox_sessao: str = Form(...),
+    atendente: str = Form(...),
+    foto: UploadFile = None,
+):
     conn = get_db_connection()
     try:
+        foto_bytes = await foto.read() if foto else None
+
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO Pacientes 
-                (nome, telefone, email, estado_civil, data_nascimento, endereco, condicao, inicio_tratamento, fim_tratamento, prox_sessao, hora_prox_sessao, atendente)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (nome, telefone, email, estado_civil, data_nascimento, endereco, condicao, inicio_tratamento, fim_tratamento, prox_sessao, hora_prox_sessao, atendente, foto)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                paciente['nome'], 
-                paciente['telefone'], 
-                paciente['email'], 
-                paciente['estado_civil'], 
-                paciente['data_nascimento'], 
-                paciente['endereco'], 
-                paciente['condicao'], 
-                paciente['inicio_tratamento'], 
-                paciente['fim_tratamento'], 
-                paciente['prox_sessao'], 
-                paciente['hora_prox_sessao'], 
-                paciente['atendente']
+                nome, 
+                telefone, 
+                email, 
+                estado_civil, 
+                data_nascimento, 
+                endereco, 
+                condicao, 
+                inicio_tratamento, 
+                fim_tratamento, 
+                prox_sessao, 
+                hora_prox_sessao, 
+                atendente,
+                foto_bytes
             ))
             conn.commit()
         return {"message": "Paciente adicionado com sucesso."}
@@ -165,6 +215,10 @@ def adicionar_paciente(paciente: dict):
         conn.close()
 
 
+
+
+
+
 @router.get("/paciente/{paciente_id}")
 def get_paciente(paciente_id: int):
     conn = get_db_connection()
@@ -172,7 +226,7 @@ def get_paciente(paciente_id: int):
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, nome, telefone, email, endereco, estado_civil, data_nascimento, condicao, 
-                       inicio_tratamento, fim_tratamento, prox_sessao, hora_prox_sessao
+                       inicio_tratamento, fim_tratamento, prox_sessao, hora_prox_sessao, foto
                 FROM Pacientes
                 WHERE id = %s
             """, (paciente_id,))
@@ -180,6 +234,11 @@ def get_paciente(paciente_id: int):
 
         if not paciente:
             raise HTTPException(status_code=404, detail="Paciente não encontrado")
+        
+        foto_base64 = None
+        if paciente[12]:  # paciente[12] é a coluna `foto`
+            foto_base64 = base64.b64encode(paciente[12]).decode("utf-8")
+                    
 
         # Retornar os dados como um dicionário
         return {
@@ -195,11 +254,16 @@ def get_paciente(paciente_id: int):
             "fim_tratamento": paciente[9],
             "prox_sessao": paciente[10],
             "hora_prox_sessao": paciente[11],
+            "foto": foto_base64
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()
+
+
+
+
 
 
 
@@ -209,7 +273,7 @@ def listar_exercicios():
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
-                SELECT id, nome, lado, descricao, angulo_minimo_exercicio, angulo_maximo_exercicio
+                SELECT id, nome, grupo_muscular, lado, x1, x2, x3, angulo_minimo_exercicio, angulo_maximo_exercicio, descricao, tipo
                 FROM Exercicios
                 ORDER BY nome ASC
             """)
@@ -223,5 +287,76 @@ def listar_exercicios():
         conn.close()
 
 
+@router.put("/{email_profissional}/exercicios/{exercicio_id}")
+def editar_exercicio(exercicio_id: int, exercicio: ExercicioUpdate):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Cria dinamicamente a lista de campos e valores a serem atualizados
+            campos = []
+            valores = []
+            for campo, valor in exercicio.dict(exclude_unset=True).items():
+                campos.append(f"{campo} = %s")
+                valores.append(valor)
+            
+            # Certifica-se de que há pelo menos um campo para atualizar
+            if not campos:
+                raise HTTPException(
+                    status_code=400, detail="Nenhum campo válido para atualizar."
+                )
+
+            # Adiciona o ID do exercício aos valores
+            valores.append(exercicio_id)
+
+            # Monta a query dinamicamente
+            query = f"""
+                UPDATE Exercicios
+                SET {', '.join(campos)}
+                WHERE id = %s
+            """
+            cur.execute(query, valores)
+            conn.commit()
+
+        return {"message": "Exercício atualizado com sucesso."}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
 
 
+
+
+
+
+
+@router.post("/{email_profissional}/exercicios/criar_exercicio")
+def adicionar_exercicio(exercicio: ExercicioCreate):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Cria o INSERT para o novo exercício
+            cur.execute("""
+                INSERT INTO Exercicios 
+                (nome, grupo_muscular, lado, x1, x2, x3, angulo_minimo_exercicio, angulo_maximo_exercicio, descricao, tipo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                exercicio.nome,
+                exercicio.grupo_muscular,
+                exercicio.lado,
+                exercicio.x1,
+                exercicio.x2,
+                exercicio.x3,
+                exercicio.angulo_minimo_exercicio,
+                exercicio.angulo_maximo_exercicio,
+                exercicio.descricao,
+                exercicio.tipo
+            ))
+            conn.commit()
+
+        return {"message": "Exercício adicionado com sucesso."}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()

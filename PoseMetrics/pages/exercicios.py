@@ -102,9 +102,149 @@ def exibir_exercicios():
             st.error("Erro ao carregar as informações do profissional.")
             return
 
+    
         
-        st.title("Exercícios")
-        st.write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+        st.title("Gerenciar Exercícios")
+        
+        with st.expander("Listar Exercícios", expanded=False):
+        # Sessão para listar e editar exercícios
+            st.subheader("Exercícios Cadastrados")
+            response_exercicios = requests.get("http://127.0.0.1:8000/home/{profissional_email}/exercicios")
+            if response_exercicios.status_code == 200:
+                exercicios = response_exercicios.json()
+                df_exercicios = pd.DataFrame(exercicios)
+                st.dataframe(df_exercicios)
+                # exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
+
+
+        with st.expander("Editar Exercício", expanded=False):
+        # Sessão para listar e editar exercícios
+            st.subheader("Exercícios Cadastrados")
+            response_exercicios = requests.get("http://127.0.0.1:8000/home/{profissional_email}/exercicios")
+            if response_exercicios.status_code == 200:
+                exercicios = response_exercicios.json()
+                df_exercicios = pd.DataFrame(exercicios)
+                # st.dataframe(df_exercicios)
+                # exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
+
+
+                # Selecionar exercício para edição
+                exercicio_selecionado = st.selectbox("Selecione um exercício para editar:", df_exercicios["nome"])
+                if exercicio_selecionado:
+                    exercicio = df_exercicios[df_exercicios["nome"] == exercicio_selecionado].iloc[0]
+
+                    with st.form(key="editar_exercicio"):
+                        nome_edit = st.text_input("Nome do exercício:", exercicio["nome"])
+                        grupo_muscular_edit = st.text_input("Grupo muscular:", exercicio["grupo_muscular"])
+                        lado_edit = st.selectbox("Lado:", ["Esquerdo", "Direito", "Ambos"], index=["Esquerdo", "Direito", "Ambos"].index(exercicio["lado"]))
+                        angulo_minimo_edit = st.number_input(
+                            "Ângulo Mínimo:",
+                            min_value=0,
+                            max_value=180,
+                            step=1,
+                            value=int(exercicio["angulo_minimo_exercicio"])  # Converte para inteiro
+                        )
+
+                        angulo_maximo_edit = st.number_input(
+                            "Ângulo Máximo:",
+                            min_value=0,
+                            max_value=180,
+                            step=1,
+                            value=int(exercicio["angulo_maximo_exercicio"])  # Converte para inteiro
+                        )
+
+                        x1_edit = st.number_input(
+                            "Ponto X1 (Mediapipe):",
+                            min_value=0,
+                            step=1,
+                            value=int(exercicio["x1"])  # Converte para inteiro
+                        )
+
+                        x2_edit = st.number_input(
+                            "Ponto X2 (Mediapipe):",
+                            min_value=0,
+                            step=1,
+                            value=int(exercicio["x2"])  # Converte para inteiro
+                        )
+
+                        x3_edit = st.number_input(
+                            "Ponto X3 (Mediapipe):",
+                            min_value=0,
+                            step=1,
+                            value=int(exercicio["x3"])  # Converte para inteiro
+                        )
+                        descricao_edit = st.text_area("Descrição do exercício:", exercicio["descricao"])
+                        tipo_opcoes = ["Força", "Flexibilidade", "Resistência", "Outro"]
+
+                        # Verifica se o tipo está na lista de opções, caso contrário, define "Outro" como valor padrão
+                        tipo_edit = st.selectbox(
+                            "Tipo:",
+                            tipo_opcoes,
+                            index=tipo_opcoes.index(exercicio["tipo"]) if exercicio["tipo"] in tipo_opcoes else 3  # Índice de "Outro"
+                        )
+                        submit_editar = st.form_submit_button("Salvar Alterações")
+
+                        if submit_editar:
+                            exercicio_editado = {
+                                "nome": nome_edit,
+                                "grupo_muscular": grupo_muscular_edit,
+                                "lado": lado_edit,
+                                "x1": x1_edit,
+                                "x2": x2_edit,
+                                "x3": x3_edit,
+                                "angulo_minimo_exercicio": angulo_minimo_edit,
+                                "angulo_maximo_exercicio": angulo_maximo_edit,
+                                "descricao": descricao_edit,
+                                "tipo": tipo_edit
+                            }
+                            exercicio_id = exercicio["id"]
+                            response_edit = requests.put(f"http://127.0.0.1:8000/home/{profissional_email}/exercicios/{exercicio_id}", json=exercicio_editado)
+                            if response_edit.status_code == 200:
+                                st.success("Exercício atualizado com sucesso!")
+                            else:
+                                st.error("Erro ao atualizar exercício.")
+            else:
+                st.error("Erro ao carregar lista de exercícios.")
+
+        with st.expander("Adicionar Exercício", expanded=False):
+        # Sessão para adicionar novo exercício
+            st.subheader("Adicionar Novo Exercício")
+            with st.form(key="adicionar_exercicio"):
+                nome = st.text_input("Nome do exercício:")
+                grupo_muscular = st.text_input("Grupo muscular:")
+                lado = st.selectbox("Lado:", ["Esquerdo", "Direito", "Ambos"])
+                x1 = st.number_input("Ponto X1 (Mediapipe):", min_value=0, step=1)
+                x2 = st.number_input("Ponto X2 (Mediapipe):", min_value=0, step=1)
+                x3 = st.number_input("Ponto X3 (Mediapipe):", min_value=0, step=1)
+                angulo_minimo = st.number_input("Ângulo Mínimo:", min_value=0, max_value=180, step=1)
+                angulo_maximo = st.number_input("Ângulo Máximo:", min_value=0, max_value=180, step=1)
+                descricao = st.text_area("Descrição do exercício:")
+                tipo = st.selectbox("Tipo:", ["Força", "Flexibilidade", "Resistência", "Outro"])
+
+                submit_adicionar = st.form_submit_button("Adicionar")
+
+                if submit_adicionar:
+                    novo_exercicio = {
+                        "nome": nome,
+                        "grupo_muscular": grupo_muscular,
+                        "lado": lado,
+                        "x1": x1,
+                        "x2": x2,
+                        "x3": x3,
+                        "angulo_minimo_exercicio": angulo_minimo,
+                        "angulo_maximo_exercicio": angulo_maximo,
+                        "descricao": descricao,
+                        "tipo": tipo
+                    }
+                    response = requests.post(f"http://127.0.0.1:8000/home/{profissional_email}/exercicios/criar_exercicio", json=novo_exercicio)
+                    if response.status_code == 200:
+                        st.success("Exercício adicionado com sucesso!")
+                    else:
+                        st.error("Erro ao adicionar exercício.")
+            
+        
+        
+    
     with col2:
         st.markdown(
             f"""
@@ -117,3 +257,19 @@ def exibir_exercicios():
             """,
             unsafe_allow_html=True,
         )
+
+
+
+        # Adiciona um espaçamento
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        
+        # Título para a nova seção
+        st.markdown(
+            """
+            <h3 style="text-align: center; margin-bottom: 20px;">Índice de Pontos</h3>
+            """,
+            unsafe_allow_html=True,
+        )
+        
+        # Adiciona a imagem abaixo do título
+        st.image("pose_landmarks_index.png", use_container_width=True)

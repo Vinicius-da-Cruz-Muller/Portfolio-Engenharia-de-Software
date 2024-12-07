@@ -1,8 +1,11 @@
 import streamlit as st
 import requests
 import pandas as pd
+import io
 from streamlit_option_menu import option_menu
 from adicionar import adicionar_novo_paciente
+
+import base64
 
 
 def exibir_pacientes():
@@ -194,11 +197,23 @@ def editar_paciente(paciente):
 
 def exibir_ficha_paciente(paciente):
     st.subheader("Ficha do Paciente")
+    if paciente.get("foto"):
+        # Decodifica a string Base64 para bytes
+        image_bytes = io.BytesIO(base64.b64decode(paciente["foto"]))
+        st.image(
+            image_bytes,
+            caption=f"Foto de {paciente.get('nome', 'Paciente')}",
+            width=150,  # Define a largura da imagem (ajustável conforme necessário)
+            use_column_width=False
+        )
+    else:
+        st.write("Foto não disponível.")
 
     # Criar layout em colunas para uma apresentação mais estruturada
     col1, col2 = st.columns(2)
 
     with col1:
+        st.markdown(f"**Teste:** {paciente.get('foto', '')}")
         st.markdown(f"**Nome:** {paciente.get('nome', '')}")
         st.markdown(f"**Telefone:** {paciente.get('telefone', '')}")
         st.markdown(f"**Estado Civil:** {paciente.get('estado_civil', '')}")
