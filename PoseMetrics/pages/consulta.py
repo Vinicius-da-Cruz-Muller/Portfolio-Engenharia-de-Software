@@ -133,23 +133,31 @@ def pagina_consulta():
             massa = st.number_input("Peso atual (em kg):", min_value=0.0, step=0.1, format="%.2f")
 
         
-        col_exercicios, col_equipamento, col_peso = st.columns([0.6, 0.2, 0.2])
-        with col_exercicios:
-            response_exercicios = requests.get(f"http://127.0.0.1:8000/home/{profissional_email}/exercicios")
-            if response_exercicios.status_code == 200:
-                exercicios = response_exercicios.json()
-                exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
-            else:
-                st.error("Erro ao carregar a lista de exercícios.")
-                return
+        # col_exercicios, col_equipamento, col_peso = st.columns([0.6, 0.2, 0.2])
+        # with col_exercicios:
+        #     response_exercicios = requests.get(f"http://127.0.0.1:8000/home/{profissional_email}/exercicios")
+        #     if response_exercicios.status_code == 200:
+        #         exercicios = response_exercicios.json()
+        #         exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
+
+        #         # Obter os dados do exercício selecionado
+        #         dados_exercicio = next(e for e in exercicios if e['nome'] == exercicio_selecionado)
+                
+        #         # Extrair os índices dos pontos e limites de ângulo
+        #         ponto1, ponto2, ponto3 = dados_exercicio['x1'], dados_exercicio['x2'], dados_exercicio['x3']
+        #         angulo_minimo = dados_exercicio['angulo_minimo_exercicio']
+        #         angulo_maximo = dados_exercicio['angulo_maximo_exercicio']
+        #     else:
+        #         st.error("Erro ao carregar a lista de exercícios.")
+        #         return
             
-        with col_equipamento:
-            opcoes = ["Halter", "Elástico", "Barra", "Polia"]
+        # with col_equipamento:
+        #     opcoes = ["Halter", "Elástico", "Barra", "Polia"]
 
-            equip = st.selectbox("Escolha um equipamento", opcoes)
+        #     equip = st.selectbox("Escolha um equipamento", opcoes)
 
-        with col_peso:
-            peso = st.number_input("Peso (em kg):", min_value=0.0, step=0.1, format="%.2f")
+        # with col_peso:
+        #     peso = st.number_input("Peso (em kg):", min_value=0.0, step=0.1, format="%.2f")
 
         
         
@@ -176,6 +184,8 @@ def pagina_consulta():
         
 
         st.subheader("Monitoramento de Exercício")
+        if 'mostrar_equipamento' not in st.session_state:
+            st.session_state.mostrar_equipamento = False
 
         col6, col7, col8 = st.columns([0.33, 0.33, 0.34])
 
@@ -195,43 +205,112 @@ def pagina_consulta():
             st.session_state.running = False
 
         if start_button:
-            st.session_state.running = True
+            # st.session_state.running = True
+            st.session_state.mostrar_equipamento = True
 
         if stop_button:
             st.session_state.running = False
+            st.session_state.mostrar_equipamento = False
 
         if cancel_button:
             cancela_sessao()
+            st.session_state.mostrar_equipamento = False
 
-        if st.session_state.running:
+        if st.session_state.mostrar_equipamento:
+            st.subheader("Configuração do Equipamento")
 
+            col_exercicios, col_equipamento, col_peso = st.columns([0.6, 0.2, 0.2])
+
+            with col_exercicios:
+                response_exercicios = requests.get(f"http://127.0.0.1:8000/home/{profissional_email}/exercicios")
+                if response_exercicios.status_code == 200:
+                    exercicios = response_exercicios.json()
+                    exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
+
+                    # Obter os dados do exercício selecionado
+                    dados_exercicio = next(e for e in exercicios if e['nome'] == exercicio_selecionado)
+
+                    # Extrair os índices dos pontos e limites de ângulo
+                    ponto1, ponto2, ponto3 = dados_exercicio['x1'], dados_exercicio['x2'], dados_exercicio['x3']
+                    angulo_minimo = dados_exercicio['angulo_minimo_exercicio']
+                    angulo_maximo = dados_exercicio['angulo_maximo_exercicio']
+                else:
+                    st.error("Erro ao carregar a lista de exercícios.")
+                    return
+
+            with col_equipamento:
+                opcoes = ["Halter", "Elástico", "Barra", "Polia"]
+                equip = st.selectbox("Escolha um equipamento", opcoes)
+
+            with col_peso:
+                peso = st.number_input("Peso (em kg):", min_value=0.0, step=0.1, format="%.2f")
+
+            
             col9, col10, col11 = st.columns([0.33, 0.33, 0.34])
 
             with col9:
                 start_serie_button = st.button("Iniciar Série")
+                
             with col10:
                 cancel_serie_button = st.button("Cancelar Série")
+                
             with col11:
                 save_serie_button = st.button("Gravar Série")
 
             if start_serie_button:
                 st.write("Série iniciada!")
+                st.session_state.running = True
                 # start_time = None
                 # serie_data = []  # Substituir pela lógica da série
             if cancel_serie_button:
-                st.write("Série cancelada!")  # Substituir pela lógica de cancelamento
+                st.write("Série cancelada!")
+                st.session_state.running = False  # Substituir pela lógica de cancelamento
+
             if save_serie_button:
                 st.write("Série gravada!")  # Substituir pela lógica de gravação
 
-            cap = cv2.VideoCapture(0)
 
+            if "data_table" not in st.session_state:
+                st.session_state.data_table = pd.DataFrame(columns=["Tempo (s)", "Posição", "Ângulo (graus)"])
+                st.session_state.start_time = None  # Para rastrear o tempo inicial
+
+                
+
+        if st.session_state.running:
             counter = 0 
             stage = None
+                    # Divisão de colunas: 80% para o vídeo e 20% para a tabela
+            col_video, col_tabela = st.columns([0.8, 0.2])
 
-            video_placeholder = st.empty()
+            with col_video:
+                video_placeholder = st.empty()
+                rep_counter = st.empty()
+                stage_text = st.empty()
 
-            rep_counter = st.empty()
-            stage_text = st.empty()
+                if st.button("Gravar"):
+                # Gravar o tempo atual, posição e ângulo
+                    current_time = time.time()
+
+                    if st.session_state.start_time is None:
+                        st.session_state.start_time = current_time
+
+                    elapsed_time = round(current_time - st.session_state.start_time, 2)
+                    posicao = stage  # Usar a variável 'stage' para posição (Cima, Baixo)
+                    angulo = 30  # Substituir com a lógica real de cálculo do ângulo
+
+                    gravar_dados(elapsed_time, posicao, angulo)
+
+            with col_tabela:
+                st.table(st.session_state.data_table)
+
+            cap = cv2.VideoCapture(0)
+
+
+
+            # video_placeholder = st.empty()
+
+            # rep_counter = st.empty()
+            # stage_text = st.empty()
             # serie_text = st.empty()
 
             with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -255,42 +334,30 @@ def pagina_consulta():
 
                     try:
                         landmarks = results.pose_landmarks.landmark
-                        shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-                        elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
-                        wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+    
+                        # Obter coordenadas dos pontos do exercício selecionado
+                        ponto1_coords = [landmarks[ponto1].x, landmarks[ponto1].y]
+                        ponto2_coords = [landmarks[ponto2].x, landmarks[ponto2].y]
+                        ponto3_coords = [landmarks[ponto3].x, landmarks[ponto3].y]
+                        
+                        # Calcular o ângulo entre os pontos
+                        angle = calculate_angle(ponto1_coords, ponto2_coords, ponto3_coords)
 
-                        angle = calculate_angle(shoulder, elbow, wrist)
-
+                        # Exibir ângulo na imagem
                         cv2.putText(image, f"Angulo: {int(angle)}", 
-                            (int(elbow[0] * frame.shape[1]), int(elbow[1] * frame.shape[0] - 20)), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-                        # current_time = time.time() - start_time
-
-                        # Lógica de contagem das repetições
-                        if angle > 80:
+                                    (int(ponto2_coords[0] * frame.shape[1]), int(ponto2_coords[1] * frame.shape[0] - 20)), 
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+                        
+                        # Lógica de contagem das repetições com base nos limites definidos
+                        if angle >= angulo_maximo:
                             stage = "baixo"
-                            # serie_data.append({
-                            #     "Tempo (s)": round(current_time, 2),
-                            #     "Ângulo": round(angle, 2),
-                            #     "Estágio": stage
-                            # })
-                        if angle < 30 and stage == 'baixo':
+                        if angle <= angulo_minimo and stage == 'baixo':
                             stage = "cima"
                             counter += 1
-                            # serie_data.append({
-                            #     "Tempo (s)": round(current_time, 2),
-                            #     "Ângulo": round(angle, 2),
-                            #     "Estágio": stage
-                            # })
-                        # cv2.putText(image, f"Repeticoes: {counter}", (10, 50), 
-                        #     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
-                        # cv2.putText(image, f"Estagio: {stage}", (10, 100), 
-                        #     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
-                        
 
+                        # Atualizar contadores na interface
                         rep_counter.write(f'Contagem: {counter}')
                         stage_text.write(f'Estágio: {stage}')
-                        # serie_text.write(f'Série: {serie_data}')
 
                     except Exception as e:
                         # st.write("Erro:", e)
@@ -345,3 +412,8 @@ def resize_frame(frame, width, height):
 
 def cancela_sessao():
     pass
+
+# Função para adicionar uma nova linha à tabela
+def gravar_dados(tempo, posicao, angulo):
+    nova_linha = {"Tempo (s)": tempo, "Posição": posicao, "Ângulo (graus)": angulo}
+    st.session_state.data_table = pd.concat([st.session_state.data_table, pd.DataFrame([nova_linha])], ignore_index=True)
