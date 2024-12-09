@@ -114,7 +114,6 @@ def obter_pacientes(email_profissional: str):
                 FROM Pacientes
                 WHERE atendente = %s
                 ORDER BY prox_sessao ASC
-                LIMIT 10
             """, (email_profissional,))
             pacientes = cur.fetchall()
 
@@ -358,5 +357,83 @@ def adicionar_exercicio(exercicio: ExercicioCreate):
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+
+
+@router.get("/pacientes/{paciente_id}/sessoes")
+def listar_sessoes_paciente(paciente_id: int):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                SELECT id, paciente_id, data_sessao, tempo_total, observacoes, massa, altura
+                FROM Sessoes
+                WHERE paciente_id = %s
+                ORDER BY data_sessao ASC
+            """, (paciente_id,))
+            sessoes = cur.fetchall()
+
+        if not sessoes:
+            return {"message": "Nenhuma sessão encontrada para o paciente informado."}
+
+        return sessoes
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+
+
+@router.get("/series/filtrar/{sessao_ids}")
+def filtrar_series(sessao_ids: str):
+    # Convertendo a string de IDs recebida na URL para uma lista de inteiros
+    ids = [int(id) for id in sessao_ids.split(',')]  # Converte a string separada por vírgulas para uma lista de inteiros
+    
+    # Conectar ao banco de dados
+    conn = get_db_connection()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Buscando as séries associadas aos IDs das sessões
+            cur.execute("""
+                SELECT id, sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equipamento, angulo_coletado
+                FROM Serie
+                WHERE sessao_id IN %s
+            """, (tuple(ids),))  # Passa a lista de IDs como uma tupla para o SQL
+            series = cur.fetchall()
+
+        if not series:
+            raise HTTPException(status_code=404, detail="Nenhuma série encontrada para os IDs fornecidos.")
+        
+        return series
+    
+    finally:
+        conn.close()
+
+
+@router.get("/exercicios/filtrar/{exercicio_ids}")
+def filtrar_exercicios(exercicio_ids: str):
+    # Aqui você vai fazer o processo de buscar os exercícios no banco de dados
+    # com base no exercicio_ids passado.
+    ids = [int(id) for id in exercicio_ids.split(',')] 
+    # Conectar ao banco de dados
+    conn = get_db_connection()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Buscando os exercícios pelos IDs
+            cur.execute("""
+                SELECT id, nome, grupo_muscular, lado, descricao
+                FROM Exercicios
+                WHERE id in %s
+            """, (tuple(ids),))
+            exercicios = cur.fetchall()
+        
+        if not exercicios:
+            raise HTTPException(status_code=404, detail="Nenhum exercício encontrado para os IDs fornecidos.")
+        
+        return exercicios
+    
     finally:
         conn.close()

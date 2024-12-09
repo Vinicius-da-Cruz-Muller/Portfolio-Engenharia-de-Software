@@ -77,7 +77,7 @@ def exibir_relatorio():
 
     
     with col1:
-
+        st.title("Relatórios")
         profissional_email = st.session_state.get("email_profissional", None)
 
         if not profissional_email:
@@ -97,14 +97,123 @@ def exibir_relatorio():
             
 
             # st.image(foto_profissional, width=100)
-            st.header(f"Bem-vindo, {nome_profissional}!")
+            # st.header(f"Bem-vindo, {nome_profissional}!")
         else:
             st.error("Erro ao carregar as informações do profissional.")
             return
 
+        response_pacientes = requests.get(
+            f"http://127.0.0.1:8000/home/{profissional_email}/listar_pacientes"
+        )
+
+        if response_pacientes.status_code == 200:
+            pacientes = response_pacientes.json()
+            if pacientes:
+                df_pacientes = pd.DataFrame(pacientes)
+                
+                paciente_nome = st.selectbox(f"{nome_profissional}, selecione um paciente para visualizar o relatório", df_pacientes['nome'])
+
+                
+                paciente_selecionado = df_pacientes[df_pacientes['nome'] == paciente_nome].iloc[0]
+                    
+            else:
+                st.write("Não há pacientes agendados para este profissional.")
+        else:
+            st.error("Erro ao carregar a lista de pacientes.")
+
         
-        st.title("Relatórios")
-        st.write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+        response_sessoes = requests.get(
+            f"http://127.0.0.1:8000/home/pacientes/{paciente_selecionado['id']}/sessoes"
+        )
+
+        if response_sessoes.status_code == 200:
+            sessoes = response_sessoes.json()
+
+            if isinstance(sessoes, list) and sessoes:  # Verifica se é uma lista e não está vazia
+                df_sessoes = pd.DataFrame(sessoes)
+                # st.dataframe(df_sessoes)
+
+                # Obter séries
+                ids_sessoes = df_sessoes['id'].tolist()
+                ids_str = ','.join(map(str, ids_sessoes))
+                # st.write(ids_str)
+                response_series = requests.get(f"http://127.0.0.1:8000/home/series/filtrar/{ids_str}")
+
+                if response_series.status_code == 200:
+                    series = response_series.json()
+                    if isinstance(series, list) and series:
+                        df_series = pd.DataFrame(series)
+
+                        # Obter os exercícios
+                        exercicio_ids = df_series['exercicio_id'].unique()  # Obter todos os IDs de exercícios únicos
+                        exercicio_ids_str = ','.join(map(str, exercicio_ids))
+                        # st.write(exercicio_ids_str)
+                        response_exercicios = requests.get(
+                            f"http://127.0.0.1:8000/home/exercicios/filtrar/{exercicio_ids_str}"
+                        )
+
+                        if response_exercicios.status_code == 200:
+                            exercicios = response_exercicios.json()
+                            if isinstance(exercicios, list) and exercicios:
+                                df_exercicios = pd.DataFrame(exercicios)
+
+                                # Associar os dados dos exercícios às séries
+                                with st.expander("Dataset do paciente", expanded = False):
+                                    df_series = df_series.merge(df_exercicios, left_on='exercicio_id', right_on='id', suffixes=('_serie', '_exercicio'))
+                                    st.dataframe(df_series)
+                                
+                                # Criar dataset consolidado
+                                dataset = pd.merge(
+                                    df_series,
+                                    df_sessoes,
+                                    left_on="sessao_id",
+                                    right_on="id",
+                                    suffixes=('_serie', '_sessao')
+                                )
+                                
+
+                                st.write("Duração das sessões")
+                                df_sessoes['data_sessao'] = pd.to_datetime(df_sessoes['data_sessao'])
+                                df_sessoes_grouped = df_sessoes.groupby('data_sessao')['tempo_total'].sum().reset_index()
+                                st.line_chart(df_sessoes_grouped.set_index('data_sessao')['tempo_total'])
+
+
+                                st.write("Acompanhamento por sessão")
+
+                                col3, col4 = st.columns([0.6, 0.4])
+                                with col3:
+                                    sessoes = dataset['data_sessao'].unique()
+                                    sessao_selecionada = st.selectbox('Escolha a Sessão:', sessoes)
+
+                                with col4:
+                                    series_sessao = dataset[dataset['data_sessao'] == sessao_selecionada]['numero_serie'].unique()
+                                    serie_selecionada = st.selectbox('Escolha a Série:', series_sessao)
+
+                                df_series_selecionada = dataset[(dataset['data_sessao'] == sessao_selecionada) & 
+                                                                (dataset['numero_serie'] == serie_selecionada)]
+
+                                df_series_selecionada = df_series_selecionada.sort_values(by='tempo')
+
+                                df_series_selecionada['ponto_numeric'] = df_series_selecionada['ponto'].apply(lambda x: 1 if x == 'Cima' else 0)
+
+                                st.line_chart(df_series_selecionada.set_index('tempo')['ponto_numeric'], use_container_width=True)
+
+                            
+                            else:
+                                st.warning("Nenhum exercício encontrado para as séries do paciente.")
+                        else:
+                            st.error(f"Erro ao carregar os exercícios. Status code: {response_exercicios.status_code}")
+                    else:
+                        st.warning("Nenhuma série encontrada para as sessões do paciente.")
+                else:
+                    st.error(f"Erro ao carregar as séries das sessões. Status code: {response_series.status_code}")
+            else:
+                st.warning("Nenhuma sessão encontrada para este paciente.")
+        else:
+            st.error("Erro ao carregar as sessões do paciente.")
+
+        
+  
     with col2:
         st.markdown(
             f"""
