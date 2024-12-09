@@ -3,6 +3,11 @@ import requests
 import pandas as pd
 from streamlit_option_menu import option_menu
 import webbrowser
+from geopy.geocoders import Nominatim
+import folium
+from folium.plugins import HeatMap
+
+geolocator = Nominatim(user_agent="posemetrics_app_v1")
 
 
 def exibir_indicadores():
@@ -77,7 +82,7 @@ def exibir_indicadores():
 
     
     with col1:
-
+        st.title("Indicadores")
         profissional_email = st.session_state.get("email_profissional", None)
 
         if not profissional_email:
@@ -97,14 +102,90 @@ def exibir_indicadores():
             
 
             # st.image(foto_profissional, width=100)
-            st.header(f"Bem-vindo, {nome_profissional}!")
+            # st.header(f"Bem-vindo, {nome_profissional}!")
         else:
             st.error("Erro ao carregar as informações do profissional.")
             return
 
+        response_pacientes = requests.get(
+                    f"http://127.0.0.1:8000/home/{profissional_email}/listar_pacientes"
+                )
         
-        st.title("Indicadores")
-        st.write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+        valid_coords = []
+        if response_pacientes.status_code == 200:
+            pacientes = response_pacientes.json()
+            if pacientes:
+                df_pacientes = pd.DataFrame(pacientes)
+                pacientes_ativos = df_pacientes[df_pacientes['status'] == True]
+                # Colunas que você deseja exibir
+                colunas_exibir = ['nome', 'endereco', 'telefone', 'condicao']  # Substitua pelos nomes das colunas desejadas
+
+                # Verificando se as colunas existem no DataFrame para evitar erros
+                colunas_existentes = [col for col in colunas_exibir if col in df_pacientes.columns]
+                df_exibir = pacientes_ativos[colunas_exibir]
+
+                # Exibindo apenas as colunas selecionadas
+                with st.expander("Seus pacientes", expanded = False):
+                    st.dataframe(df_exibir)
+
+                for index, row in df_pacientes.iterrows():
+                    endereco = row['endereco']
+                    latitude, longitude = geocode_address(endereco)
+                    if latitude and longitude:  # Endereço válido
+                        valid_coords.append([latitude, longitude])
+                    else:
+                        st.warning(f"Endereço inválido ou não encontrado: {endereco}")
+
+
+                # Contando pacientes ativos
+                pacientes_ativos = df_pacientes[df_pacientes['status'] == True].shape[0]
+
+                # Obtendo condições únicas
+                condicoes_tratadas = df_pacientes['condicao'].unique()
+
+                # Exibindo os resultados
+                col_total, col_condicao = st.columns([0.2, 0.8])
+                with col_total:
+                    st.write(f"Total de pacientes ativos: {pacientes_ativos}")
+                with col_condicao:
+                    with st.expander("Condições que você acompanha", expanded=False):
+                        st.write("Condições tratadas:")
+                        for condicao in condicoes_tratadas:
+                            st.write(f"- {condicao}")
+
+                if valid_coords:
+                    # Criação do mapa centrado na média das coordenadas validadas
+                    mean_lat = sum(coord[0] for coord in valid_coords) / len(valid_coords)
+                    mean_lon = sum(coord[1] for coord in valid_coords) / len(valid_coords)
+                    mapa = folium.Map(location=[mean_lat, mean_lon], zoom_start=12)
+
+                    # Adicionando marcadores para cada coordenada válida
+                    for coord in valid_coords:
+                        folium.Marker(location=coord, icon=folium.Icon(color='blue')).add_to(mapa)
+
+                    # Exibindo o mapa no Streamlit
+                    st.subheader("Mapa de Pacientes")
+                    st.components.v1.html(mapa._repr_html_(), height=600)
+                else:
+                    st.warning("Não foi possível encontrar nenhum endereço válido para os pacientes.")
+
+                
+                # Exibindo mapa de calor
+                if valid_coords:
+                    mapa = folium.Map(location=[df_pacientes['latitude'].mean(), df_pacientes['longitude'].mean()], zoom_start=12)
+                    HeatMap(valid_coords).add_to(mapa)
+                    st.write("Mapa de Densidade de Pacientes")
+                    st.components.v1.html(mapa._repr_html_(), height=600)
+                else:
+                    st.warning("Não foi possível encontrar nenhum endereço válido para os pacientes.")
+
+                    
+            else:
+                st.write("Não há pacientes agendados para este profissional.")
+        else:
+            st.error("Erro ao carregar a lista de pacientes.")
+        
+
     with col2:
         st.markdown(
             f"""
@@ -117,3 +198,10 @@ def exibir_indicadores():
             """,
             unsafe_allow_html=True,
         )
+
+
+def geocode_address(address):
+    location = geolocator.geocode(address)
+    if location:
+        return location.latitude, location.longitude
+    return None, None
