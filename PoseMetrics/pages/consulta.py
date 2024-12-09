@@ -253,6 +253,7 @@ def pagina_consulta():
         with col_tabela:
             st.table(st.session_state.data_table)
 
+        st.write("") #gambiarra de alto nível para não gerar frozen frame kkkkk - não retirar, sujeita a paulada
 
         with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
             while cap.isOpened() and st.session_state.running:
