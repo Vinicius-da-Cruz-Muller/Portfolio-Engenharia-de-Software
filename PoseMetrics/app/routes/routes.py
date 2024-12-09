@@ -6,6 +6,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from app.routes.auth import router as auth_router
 from app.database import get_db_connection
+from datetime import date
 
 import base64
 
@@ -64,6 +65,16 @@ class ExercicioCreate(BaseModel):
     tipo: str
 
 
+class SessaoPayload(BaseModel):
+    paciente_id: int
+    massa: float
+    altura: float
+
+
+class ConcluirSessaoPayload(BaseModel):
+    sessao_id: int
+    tempo_total: float
+    observacoes: str
 
 
 @router.get("/{email_profissional}")
@@ -435,5 +446,76 @@ def filtrar_exercicios(exercicio_ids: str):
         
         return exercicios
     
+    finally:
+        conn.close()
+
+
+
+
+@router.post("/sessoes/iniciar")
+def iniciar_ou_atualizar_sessao(payload: SessaoPayload):
+    conn = get_db_connection()
+    try:
+        hoje = date.today()  # Data atual
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Verificar se já existe uma sessão para o dia atual
+            cur.execute("""
+                SELECT id FROM Sessoes
+                WHERE paciente_id = %s AND DATE(data_sessao) = %s
+            """, (payload.paciente_id, hoje))
+            
+            sessao_existente = cur.fetchone()
+            
+            if sessao_existente:
+                # Atualizar sessão existente
+                sessao_id = sessao_existente["id"]
+                cur.execute("""
+                    UPDATE Sessoes
+                    SET massa = %s, altura = %s
+                    WHERE id = %s
+                """, (payload.massa, payload.altura, sessao_id))
+                conn.commit()
+                return {"message": "Sessão atualizada com sucesso.", "sessao_id": sessao_id}
+            else:
+                # Criar nova sessão
+                cur.execute("""
+                    INSERT INTO Sessoes (paciente_id, data_sessao, tempo_total, massa, altura)
+                    VALUES (%s, NOW(), %s, %s, %s)
+                    RETURNING id
+                """, (payload.paciente_id, 0, payload.massa, payload.altura))
+                sessao_id = cur.fetchone()["id"]
+                conn.commit()
+                return {"message": "Nova sessão criada com sucesso.", "sessao_id": sessao_id}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.put("/sessoes/concluir")
+def concluir_sessao(payload: ConcluirSessaoPayload):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Verificar se a sessão existe
+            cur.execute("SELECT id FROM Sessoes WHERE id = %s", (payload.sessao_id,))
+            sessao = cur.fetchone()
+
+            if not sessao:
+                raise HTTPException(status_code=404, detail="Sessão não encontrada.")
+
+            # Atualizar a sessão com o tempo total e as observações
+            cur.execute("""
+                UPDATE Sessoes
+                SET tempo_total = %s, observacoes = %s
+                WHERE id = %s
+            """, (payload.tempo_total, payload.observacoes, payload.sessao_id))
+
+            conn.commit()
+            return {"message": "Sessão concluída com sucesso."}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()

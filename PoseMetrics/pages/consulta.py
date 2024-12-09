@@ -6,6 +6,7 @@ from streamlit_option_menu import option_menu
 import cv2
 import numpy as np
 import time
+import datetime
 
 def pagina_consulta():
     st.markdown(
@@ -117,18 +118,53 @@ def pagina_consulta():
                 
         #         # paciente_selecionado = df_pacientes[df_pacientes['nome'] == paciente_nome].iloc[0]
         #         # editar_paciente(paciente_selecionado)
-                    
+            # Obter o ID do paciente selecionado
+                paciente_selecionado = df_pacientes[df_pacientes['nome'] == paciente_nome]
+                paciente_id = paciente_selecionado.iloc[0]['id']
+
+                # Buscar as sessões do paciente
+                response_sessoes = requests.get(
+                    f"http://127.0.0.1:8000/home/pacientes/{paciente_id}/sessoes"
+                )
+
+                if response_sessoes.status_code == 200:
+                    sessoes = response_sessoes.json()
+
+                    if isinstance(sessoes, list) and sessoes:
+                        # Última sessão
+                        ultima_sessao = sessoes[-1]
+                        ultima_massa = ultima_sessao.get('massa')
+                        ultima_altura = ultima_sessao.get('altura')
+                        
+                        st.info(f"Últimos dados encontrados para {paciente_nome}:")
+                        st.write(f"Altura: {ultima_altura} cm, Massa: {ultima_massa} kg")
+                    else:
+                        st.warning(f"Nenhuma sessão encontrada para {paciente_nome}. Preencha os dados abaixo.")
+                else:
+                    st.error(f"Erro ao buscar sessões para {paciente_nome}.")
+                        
             else:
                 st.write("Não há pacientes agendados para este profissional.")
         else:
             st.error("Erro ao carregar a lista de pacientes.")
     
     with col_altura:
-        altura = st.number_input("Altura atual (em cm):", min_value=0.0, step=0.1, format="%.2f")
-    
-    with col_massa:
-        massa = st.number_input("Peso atual (em kg):", min_value=0.0, step=0.1, format="%.2f")
+        altura = st.number_input(
+            "Altura atual (em cm):", 
+            value=float(ultima_altura) if 'ultima_altura' in locals() and ultima_altura else 0.0,
+            min_value=0.0, 
+            step=0.1, 
+            format="%.2f"
+        )
 
+    with col_massa:
+        massa = st.number_input(
+            "Peso atual (em kg):", 
+            value=float(ultima_massa) if 'ultima_massa' in locals() and ultima_massa else 0.0,
+            min_value=0.0, 
+            step=0.1, 
+            format="%.2f"
+        )
     
     
 
@@ -152,18 +188,103 @@ def pagina_consulta():
 
     if 'running' not in st.session_state:
         st.session_state.running = False
+        
+
+    # Inicialização de variáveis de estado
+    if 'sessao_iniciada' not in st.session_state:
+        st.session_state.sessao_iniciada = False
+
+    if 'start_time' not in st.session_state:
+        st.session_state.start_time = None
+
+    if 'sessao_id' not in st.session_state:
+        st.session_state.sessao_id = None    
 
     if start_button:
-        # st.session_state.running = True
+        # Preparar os dados para a requisição
+        payload = {
+            "paciente_id": int(paciente_id),  # Garantir que o id seja do tipo int
+            "massa": float(massa),  # Garantir que a massa seja do tipo float
+            "altura": float(altura),  # Garantir que a altura seja do tipo float
+        }
+        
+        # Verificar ou criar/atualizar a sessão
+        response_sessao = requests.post(
+            "http://127.0.0.1:8000/home/sessoes/iniciar",
+            json=payload
+        )
+
+        if response_sessao.status_code == 200:
+            st.session_state.sessao_id = response_sessao.json()["sessao_id"]
+            st.session_state.sessao_iniciada = True
+            st.session_state.start_time = time.time()
+            st.session_state.running = True
+            st.success(response_sessao.json()["message"])
+
+            # Iniciar o temporizador
+            # st.session_state.start_time = time.time()
+            st.write("Sessão em andamento. Adicione suas observações abaixo:")
+
+            comentario = st.text_area(
+                "Comentários sobre a sessão:",
+                placeholder="Digite observações relevantes...",
+                key="comentario_sessao"
+            )
+
+            
+        else:
+            st.error("Erro ao iniciar ou atualizar a sessão.")
+
         st.session_state.mostrar_equipamento = True
 
+
+
     if stop_button:
-        st.session_state.running = False
-        st.session_state.mostrar_equipamento = False
+        if st.session_state.get("sessao_iniciada", False):
+            # Verificar se o start_time foi corretamente inicializado
+            if st.session_state.start_time is not None:
+                # Calcular o tempo total da sessão
+                tempo_fim = time.time()
+                tempo_total = (tempo_fim - st.session_state.start_time) / 60  # Tempo total em minutos
+                
+            # Pegar o comentário já preenchido
+                comentario = st.session_state.get("comentario_sessao", "")
+
+                # Preparar o payload para a requisição de conclusão
+                payload_concluir = {
+                    "sessao_id": st.session_state.sessao_id,
+                    "tempo_total": round(tempo_total, 2),  # Arredondar para 2 casas decimais
+                    "observacoes": comentario
+                }
+                st.write(payload_concluir)
+
+                # Enviar os dados para o backend
+                response_concluir = requests.put(
+                    "http://127.0.0.1:8000/home/sessoes/concluir",
+                    json=payload_concluir
+                )
+
+                if response_concluir.status_code == 200:
+                    st.success("Sessão concluída com sucesso!")
+                else:
+                    st.error("Erro ao concluir a sessão.")
+
+                # Resetar estado da sessão
+                st.session_state.sessao_iniciada = False
+                st.session_state.start_time = None
+                st.session_state.sessao_id = None
+                st.session_state.mostrar_equipamento = False
+                st.session_state.running = False
+            else:
+                st.error("Dados da sessão não registrados corretamente.")
+        else:
+            st.warning("Inicie uma sessão antes de concluí-la.")
+
 
     if cancel_button:
         cancela_sessao()
         st.session_state.mostrar_equipamento = False
+        st.session_state.running = False
 
     if st.session_state.mostrar_equipamento:
         st.subheader("Configuração do Equipamento")
