@@ -76,6 +76,15 @@ class ConcluirSessaoPayload(BaseModel):
     tempo_total: float
     observacoes: str
 
+class SeriePayload(BaseModel):
+    sessao_id: int
+    exercicio_id: int
+    numero_serie: int
+    tempo: float  # Tempo da série (em minutos ou segundos, dependendo do que você está utilizando)
+    ponto: str  # Ponto (por exemplo, "Cima" ou "Baixo")
+    peso: float  # Peso utilizado
+    equipamento: str  # Equipamento utilizado (ex: "halteres", "barra", etc.)
+    angulo_coletado: float  # Ângulo coletado durante o exercício
 
 @router.get("/{email_profissional}")
 def obter_profissional(email_profissional: str):
@@ -517,5 +526,43 @@ def concluir_sessao(payload: ConcluirSessaoPayload):
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+
+
+
+@router.post("/api/serie/gravar")
+def gravar_serie(serie: SeriePayload):
+    conn = get_db_connection()  # Função para obter a conexão com o banco de dados
+    try:
+        # Inserir os dados da nova série na tabela Serie
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                INSERT INTO Serie (sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equipamento, angulo_coletado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (serie.sessao_id, serie.exercicio_id, serie.numero_serie, serie.tempo,
+                  serie.ponto, serie.peso, serie.equipamento, serie.angulo_coletado))
+            serie_id = cur.fetchone()["id"]
+            conn.commit()
+        
+        return {
+            "message": "Série gravada com sucesso",
+            "serie_id": serie_id,
+            "sessao_id": serie.sessao_id,
+            "exercicio_id": serie.exercicio_id,
+            "numero_serie": serie.numero_serie,
+            "tempo": serie.tempo,
+            "ponto": serie.ponto,
+            "peso": serie.peso,
+            "equipamento": serie.equipamento,
+            "angulo_coletado": serie.angulo_coletado
+        }
+    
+    except Exception as e:
+        conn.rollback()  # Em caso de erro, desfazer a operação
+        raise HTTPException(status_code=400, detail=str(e))
+    
     finally:
         conn.close()

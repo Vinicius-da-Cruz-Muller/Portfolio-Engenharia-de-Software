@@ -189,7 +189,12 @@ def pagina_consulta():
     if 'running' not in st.session_state:
         st.session_state.running = False
         
-
+    # Definir as variáveis de configuração e tabelas
+    if "serie_table" not in st.session_state:
+        st.session_state.serie_table = pd.DataFrame(columns=[
+            "sessao_id", "exercicio_id", "numero_serie", "tempo", "ponto", "peso", "equipamento", "angulo_coletado"
+        ])
+        # st.session_state.numero_serie = 1  # Iniciar o contador de séries
     # Inicialização de variáveis de estado
     if 'sessao_iniciada' not in st.session_state:
         st.session_state.sessao_iniciada = False
@@ -218,7 +223,7 @@ def pagina_consulta():
             st.session_state.sessao_id = response_sessao.json()["sessao_id"]
             st.session_state.sessao_iniciada = True
             st.session_state.start_time = time.time()
-            st.session_state.running = True
+            # st.session_state.running = True
             st.success(response_sessao.json()["message"])
 
             # Iniciar o temporizador
@@ -236,6 +241,7 @@ def pagina_consulta():
             st.error("Erro ao iniciar ou atualizar a sessão.")
 
         st.session_state.mostrar_equipamento = True
+        st.session_state.numero_serie = 1
 
 
 
@@ -256,7 +262,7 @@ def pagina_consulta():
                     "tempo_total": round(tempo_total, 2),  # Arredondar para 2 casas decimais
                     "observacoes": comentario
                 }
-                st.write(payload_concluir)
+                # st.write(payload_concluir)
 
                 # Enviar os dados para o backend
                 response_concluir = requests.put(
@@ -304,6 +310,7 @@ def pagina_consulta():
                 ponto1, ponto2, ponto3 = dados_exercicio['x1'], dados_exercicio['x2'], dados_exercicio['x3']
                 angulo_minimo = dados_exercicio['angulo_minimo_exercicio']
                 angulo_maximo = dados_exercicio['angulo_maximo_exercicio']
+                st.session_state.exercicio_id = dados_exercicio['id']
             else:
                 st.error("Erro ao carregar a lista de exercícios.")
                 return
@@ -311,9 +318,11 @@ def pagina_consulta():
         with col_equipamento:
             opcoes = ["Halter", "Elástico", "Barra", "Polia"]
             equip = st.selectbox("Escolha um equipamento", opcoes)
+            st.session_state.equipamento = equip
 
         with col_peso:
             peso = st.number_input("Peso (em kg):", min_value=0.0, step=0.1, format="%.2f")
+            st.session_state.peso_coletado = peso
 
         
         col9, col10, col11 = st.columns([0.33, 0.33, 0.34])
@@ -330,14 +339,45 @@ def pagina_consulta():
         if start_serie_button:
             st.write("Série iniciada!")
             st.session_state.running = True
+            st.session_state.data_table = None
             # start_time = None
             # serie_data = []  # Substituir pela lógica da série
         if cancel_serie_button:
             st.write("Série cancelada!")
             st.session_state.running = False  # Substituir pela lógica de cancelamento
 
+        
         if save_serie_button:
-            st.write("Série gravada!")  # Substituir pela lógica de gravação
+            st.write("Série gravada!")
+            # Passar os dados da tabela 'data_table' para a tabela 'serie'
+            for index, row in st.session_state.data_table.iterrows():
+                tempo = row["Tempo (s)"]
+                ponto = row["Posição"]
+                angulo = row["Ângulo (graus)"]
+                
+                # Supondo que peso e equipamento sejam inseridos pelo profissional
+                # peso_coletado = st.session_state.get("peso", 0)  # Valor do peso
+                # equipamento = st.session_state.get("equip", "")  # Equipamento selecionado
+                
+                # Chamar a função para gravar os dados na tabela 'serie'
+                gravar_serie(
+                    sessao_id=st.session_state.sessao_id,
+                    exercicio_id=st.session_state.exercicio_id,  # Você deve garantir que o exercicio_id esteja disponível
+                    numero_serie=st.session_state.numero_serie,
+                    tempo=tempo,
+                    ponto=ponto,
+                    peso=st.session_state.peso_coletado,
+                    equipamento=st.session_state.equipamento,
+                    angulo_coletado=round(angulo, 1)
+                )
+                
+            st.session_state.numero_serie += 1 
+            # Exibir a tabela de séries
+            st.write("Tabela de Séries Gravadas:")
+            st.table(st.session_state.serie_table)  # Substituir pela lógica de gravação
+            st.session_state.serie_table = None
+
+        
 
 
         if "data_table" not in st.session_state:
@@ -347,6 +387,7 @@ def pagina_consulta():
             
 
     if st.session_state.running:
+
         cap = cv2.VideoCapture(0)
         counter = 0 
         stage = None
@@ -472,3 +513,30 @@ def cancela_sessao():
 def gravar_dados(tempo, posicao, angulo):
     nova_linha = {"Tempo (s)": tempo, "Posição": posicao, "Ângulo (graus)": angulo}
     st.session_state.data_table = pd.concat([st.session_state.data_table, pd.DataFrame([nova_linha])], ignore_index=True)
+
+
+# Função para gravar os dados da série na tabela e enviar para a API
+def gravar_serie(sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equipamento, angulo_coletado):
+    nova_linha = {
+        "sessao_id": sessao_id,
+        "exercicio_id": exercicio_id,
+        "numero_serie": numero_serie,
+        "tempo": tempo,
+        "ponto": ponto,
+        "peso": peso,
+        "equipamento": equipamento,
+        "angulo_coletado": angulo_coletado
+    }
+    st.write(nova_linha)
+    # Enviar os dados para a API (substitua com sua URL real)
+    url_api = "http://127.0.0.1:8000/home/api/serie/gravar"  # A URL para a rota que grava os dados
+    response = requests.post(url_api, json=nova_linha)
+
+    if response.status_code == 200:
+        st.success("Série gravada com sucesso!")
+    else:
+        st.error("Erro ao gravar a série na API.")
+
+    nova_linha_df = pd.DataFrame([nova_linha])  # Converter nova_linha em DataFrame
+    st.session_state.serie_table = pd.concat([st.session_state.serie_table, nova_linha_df], ignore_index=True)  # Usar pd.concat para adicionar nova linha
+    # st.session_state.numero_serie += 1  # Incrementar o número da série
