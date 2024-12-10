@@ -9,6 +9,19 @@ from folium.plugins import HeatMap
 
 geolocator = Nominatim(user_agent="posemetrics_app_v1")
 
+def obter_clima(cidade, api_key):
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={api_key}&units=metric&lang=pt_br"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+API_KEY = "2447cbd5fa4a0fe9a829980416a8dd54"
+
+CIDADE = "Jaraguá do Sul"
+
 
 def exibir_indicadores():
     st.markdown(
