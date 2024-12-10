@@ -26,8 +26,6 @@ def exibir_relatorio():
             menu_title = None,
             options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
             icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
-            # menu_icon="menu-button-wide-fill", 
-            # default_index=0
             styles={
             "container": {"background-color": "#4E937A60"},  
             "icon": {"color": "#A22C29", "font-size": "20px"},  
@@ -67,9 +65,6 @@ def exibir_relatorio():
     if selected == "Sobre":
         st.session_state.pagina_atual = "sobre"
         st.rerun()
-    # if selected == "Sobre":
-    #     github_url = "https://github.com/Vinicius-da-Cruz-Muller"  # Substitua pelo link do seu GitHub
-    #     webbrowser.open_new_tab(github_url)
 
     
 
@@ -129,14 +124,11 @@ def exibir_relatorio():
         if response_sessoes.status_code == 200:
             sessoes = response_sessoes.json()
 
-            if isinstance(sessoes, list) and sessoes:  # Verifica se é uma lista e não está vazia
+            if isinstance(sessoes, list) and sessoes:  
                 df_sessoes = pd.DataFrame(sessoes)
-                # st.dataframe(df_sessoes)
 
-                # Obter séries
                 ids_sessoes = df_sessoes['id'].tolist()
                 ids_str = ','.join(map(str, ids_sessoes))
-                # st.write(ids_str)
                 response_series = requests.get(f"http://127.0.0.1:8000/home/series/filtrar/{ids_str}")
 
                 if response_series.status_code == 200:
@@ -144,10 +136,8 @@ def exibir_relatorio():
                     if isinstance(series, list) and series:
                         df_series = pd.DataFrame(series)
 
-                        # Obter os exercícios
-                        exercicio_ids = df_series['exercicio_id'].unique()  # Obter todos os IDs de exercícios únicos
+                        exercicio_ids = df_series['exercicio_id'].unique() 
                         exercicio_ids_str = ','.join(map(str, exercicio_ids))
-                        # st.write(exercicio_ids_str)
                         response_exercicios = requests.get(
                             f"http://127.0.0.1:8000/home/exercicios/filtrar/{exercicio_ids_str}"
                         )
@@ -157,12 +147,10 @@ def exibir_relatorio():
                             if isinstance(exercicios, list) and exercicios:
                                 df_exercicios = pd.DataFrame(exercicios)
 
-                                # Associar os dados dos exercícios às séries
                                 with st.expander("Dataset do paciente", expanded = False):
                                     df_series = df_series.merge(df_exercicios, left_on='exercicio_id', right_on='id', suffixes=('_serie', '_exercicio'))
                                     st.dataframe(df_series)
                                 
-                                # Criar dataset consolidado
                                 dataset = pd.merge(
                                     df_series,
                                     df_sessoes,

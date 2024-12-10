@@ -29,8 +29,6 @@ def pagina_consulta():
             menu_title = None,
             options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
             icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
-            # menu_icon="menu-button-wide-fill", 
-            # default_index=0
             styles={
             "container": {"background-color": "#4E937A60"},  
             "icon": {"color": "#A22C29", "font-size": "20px"},  
@@ -70,9 +68,7 @@ def pagina_consulta():
     if selected == "Sobre":
         st.session_state.pagina_atual = "sobre"
         st.rerun()
-    # if selected == "Sobre":
-    #     github_url = "https://github.com/Vinicius-da-Cruz-Muller"  # Substitua pelo link do seu GitHub
-    #     webbrowser.open_new_tab(github_url)
+
 
 
 
@@ -114,15 +110,10 @@ def pagina_consulta():
                 df_pacientes = pd.DataFrame(pacientes)
                 
                 paciente_nome = st.selectbox("Selecione um paciente", df_pacientes['nome'])
-        #         paciente_id = df_pacientes["id"]
-                
-        #         # paciente_selecionado = df_pacientes[df_pacientes['nome'] == paciente_nome].iloc[0]
-        #         # editar_paciente(paciente_selecionado)
-            # Obter o ID do paciente selecionado
+
                 paciente_selecionado = df_pacientes[df_pacientes['nome'] == paciente_nome]
                 paciente_id = paciente_selecionado.iloc[0]['id']
 
-                # Buscar as sessões do paciente
                 response_sessoes = requests.get(
                     f"http://127.0.0.1:8000/home/pacientes/{paciente_id}/sessoes"
                 )
@@ -131,7 +122,6 @@ def pagina_consulta():
                     sessoes = response_sessoes.json()
 
                     if isinstance(sessoes, list) and sessoes:
-                        # Última sessão
                         ultima_sessao = sessoes[-1]
                         ultima_massa = ultima_sessao.get('massa')
                         ultima_altura = ultima_sessao.get('altura')
@@ -188,13 +178,11 @@ def pagina_consulta():
     if 'running' not in st.session_state:
         st.session_state.running = False
         
-    # Definir as variáveis de configuração e tabelas
     if "serie_table" not in st.session_state:
         st.session_state.serie_table = pd.DataFrame(columns=[
             "sessao_id", "exercicio_id", "numero_serie", "tempo", "ponto", "peso", "equipamento", "angulo_coletado"
         ])
-        # st.session_state.numero_serie = 1  # Iniciar o contador de séries
-    # Inicialização de variáveis de estado
+
     if 'sessao_iniciada' not in st.session_state:
         st.session_state.sessao_iniciada = False
 
@@ -205,14 +193,12 @@ def pagina_consulta():
         st.session_state.sessao_id = None    
 
     if start_button:
-        # Preparar os dados para a requisição
         payload = {
-            "paciente_id": int(paciente_id),  # Garantir que o id seja do tipo int
-            "massa": float(massa),  # Garantir que a massa seja do tipo float
-            "altura": float(altura),  # Garantir que a altura seja do tipo float
+            "paciente_id": int(paciente_id), 
+            "massa": float(massa),  
+            "altura": float(altura),  
         }
         
-        # Verificar ou criar/atualizar a sessão
         response_sessao = requests.post(
             "http://127.0.0.1:8000/home/sessoes/iniciar",
             json=payload
@@ -222,11 +208,8 @@ def pagina_consulta():
             st.session_state.sessao_id = response_sessao.json()["sessao_id"]
             st.session_state.sessao_iniciada = True
             st.session_state.start_time = time.time()
-            # st.session_state.running = True
             st.success(response_sessao.json()["message"])
 
-            # Iniciar o temporizador
-            # st.session_state.start_time = time.time()
             st.write("Sessão em andamento. Adicione suas observações abaixo:")
 
             comentario = st.text_area(
@@ -246,24 +229,18 @@ def pagina_consulta():
 
     if stop_button:
         if st.session_state.get("sessao_iniciada", False):
-            # Verificar se o start_time foi corretamente inicializado
             if st.session_state.start_time is not None:
-                # Calcular o tempo total da sessão
                 tempo_fim = time.time()
                 tempo_total = (tempo_fim - st.session_state.start_time) / 60  # Tempo total em minutos
                 
-            # Pegar o comentário já preenchido
                 comentario = st.session_state.get("comentario_sessao", "")
 
-                # Preparar o payload para a requisição de conclusão
                 payload_concluir = {
                     "sessao_id": st.session_state.sessao_id,
-                    "tempo_total": round(tempo_total, 2),  # Arredondar para 2 casas decimais
+                    "tempo_total": round(tempo_total, 2),  
                     "observacoes": comentario
                 }
-                # st.write(payload_concluir)
 
-                # Enviar os dados para o backend
                 response_concluir = requests.put(
                     "http://127.0.0.1:8000/home/sessoes/concluir",
                     json=payload_concluir
@@ -274,7 +251,6 @@ def pagina_consulta():
                 else:
                     st.error("Erro ao concluir a sessão.")
 
-                # Resetar estado da sessão
                 st.session_state.sessao_iniciada = False
                 st.session_state.start_time = None
                 st.session_state.sessao_id = None
@@ -292,7 +268,6 @@ def pagina_consulta():
         st.session_state.running = False
 
     if st.session_state.mostrar_equipamento:
-        # st.subheader("Configuração do Equipamento")
 
         col_exercicios, col_equipamento, col_peso = st.columns([0.6, 0.2, 0.2])
 
@@ -302,10 +277,8 @@ def pagina_consulta():
                 exercicios = response_exercicios.json()
                 exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
 
-                # Obter os dados do exercício selecionado
                 dados_exercicio = next(e for e in exercicios if e['nome'] == exercicio_selecionado)
 
-                # Extrair os índices dos pontos e limites de ângulo
                 ponto1, ponto2, ponto3 = dados_exercicio['x1'], dados_exercicio['x2'], dados_exercicio['x3']
                 angulo_minimo = dados_exercicio['angulo_minimo_exercicio']
                 angulo_maximo = dados_exercicio['angulo_maximo_exercicio']
@@ -315,7 +288,7 @@ def pagina_consulta():
                 return
 
         with col_equipamento:
-            opcoes = ["Halter", "Elástico", "Barra", "Polia"]
+            opcoes = ["Halter", "Elástico", "Barra", "Polia", "Peso do Corpo"]
             equip = st.selectbox("Escolha um equipamento", opcoes)
             st.session_state.equipamento = equip
 
@@ -339,29 +312,20 @@ def pagina_consulta():
             st.write("Série iniciada!")
             st.session_state.running = True
             st.session_state.data_table = None
-            # start_time = None
-            # serie_data = []  # Substituir pela lógica da série
         if cancel_serie_button:
             st.write("Série cancelada!")
-            st.session_state.running = False  # Substituir pela lógica de cancelamento
-
+            st.session_state.running = False  
         
         if save_serie_button:
             st.write("Série gravada!")
-            # Passar os dados da tabela 'data_table' para a tabela 'serie'
             for index, row in st.session_state.data_table.iterrows():
                 tempo = row["Tempo (s)"]
                 ponto = row["Posição"]
                 angulo = row["Ângulo (graus)"]
                 
-                # Supondo que peso e equipamento sejam inseridos pelo profissional
-                # peso_coletado = st.session_state.get("peso", 0)  # Valor do peso
-                # equipamento = st.session_state.get("equip", "")  # Equipamento selecionado
-                
-                # Chamar a função para gravar os dados na tabela 'serie'
                 gravar_serie(
                     sessao_id=st.session_state.sessao_id,
-                    exercicio_id=st.session_state.exercicio_id,  # Você deve garantir que o exercicio_id esteja disponível
+                    exercicio_id=st.session_state.exercicio_id,  
                     numero_serie=st.session_state.numero_serie,
                     tempo=tempo,
                     ponto=ponto,
@@ -371,9 +335,8 @@ def pagina_consulta():
                 )
                 
             st.session_state.numero_serie += 1 
-            # Exibir a tabela de séries
             st.write("Tabela de Séries Gravadas:")
-            st.table(st.session_state.serie_table)  # Substituir pela lógica de gravação
+            st.table(st.session_state.serie_table) 
             st.session_state.serie_table = None
 
         
@@ -381,8 +344,7 @@ def pagina_consulta():
 
         if "data_table" not in st.session_state:
             st.session_state.data_table = pd.DataFrame(columns=["Tempo (s)", "Posição", "Ângulo (graus)"])
-            st.session_state.start_time = None  # Para rastrear o tempo inicial
-
+            st.session_state.start_time = None  
             
 
     if st.session_state.running:
@@ -390,24 +352,21 @@ def pagina_consulta():
         cap = cv2.VideoCapture(0)
         counter = 0 
         stage = None
-                # Divisão de colunas: 80% para o vídeo e 20% para a tabela
         col_video, col_tabela = st.columns([0.7, 0.3])
 
         with col_video:
             video_placeholder = st.empty()
-            # rep_counter = st.empty()
             stage_text = st.empty()
 
             if st.button("Gravar"):
-            # Gravar o tempo atual, posição e ângulo
                 current_time = time.time()
 
                 if st.session_state.start_time is None:
                     st.session_state.start_time = current_time
 
                 elapsed_time = round(current_time - st.session_state.start_time, 2)
-                posicao = st.session_state.ponto  # Usar a variável 'stage' para posição (Cima, Baixo)
-                angulo = st.session_state.angle # Substituir com a lógica real de cálculo do ângulo
+                posicao = st.session_state.ponto  
+                angulo = st.session_state.angle 
 
                 gravar_dados(elapsed_time, posicao, angulo)
 
@@ -426,7 +385,6 @@ def pagina_consulta():
 
                 frame = resize_frame(frame, 640, 480)
 
-                # Recolorir imagem para RGB
                 image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 image.flags.writeable = False
 
@@ -438,21 +396,17 @@ def pagina_consulta():
                 try:
                     landmarks = results.pose_landmarks.landmark
 
-                    # Obter coordenadas dos pontos do exercício selecionado
                     ponto1_coords = [landmarks[ponto1].x, landmarks[ponto1].y]
                     ponto2_coords = [landmarks[ponto2].x, landmarks[ponto2].y]
                     ponto3_coords = [landmarks[ponto3].x, landmarks[ponto3].y]
                     
-                    # Calcular o ângulo entre os pontos
                     st.session_state.angle = calculate_angle(ponto1_coords, ponto2_coords, ponto3_coords)
 
-                    # Exibir ângulo na imagem
                     cv2.putText(image, f"Angulo: {int(st.session_state.angle)}", 
                                 (int(ponto2_coords[0] * frame.shape[1]), int(ponto2_coords[1] * frame.shape[0] - 20)), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
                     
-                    # Lógica de contagem das repetições com base nos limites definidos
-                    # st.session_state.ponto = ""
+ 
                     if st.session_state.angle >= angulo_maximo:
                         stage = "baixo"
                         st.session_state.ponto = stage
@@ -461,24 +415,19 @@ def pagina_consulta():
                         st.session_state.ponto = stage
                         counter += 1
 
-                    # Inicialize a flag na sessão do Streamlit (fora do loop)
                     if "aviso_exibido" not in st.session_state:
                         st.session_state.aviso_exibido = False
 
-                    # Verificar se o exercício é do tipo flexibilidade
                     if dados_exercicio['tipo'] == 'Flexibilidade':
-                        # Verificar se o ângulo ultrapassa os limites
                         if st.session_state.angle > angulo_maximo and not st.session_state.aviso_exibido:
                             st.success(f"Você ultrapassou o ângulo máximo do exercício ({angulo_maximo}°)!")
-                            st.session_state.aviso_exibido = True  # Marcar que o aviso foi exibido
+                            st.session_state.aviso_exibido = True  
                         elif st.session_state.angle < angulo_minimo and not st.session_state.aviso_exibido:
                             st.success(f"Você ultrapassou o ângulo mínimo do exercício ({angulo_minimo}°)!")
-                            st.session_state.aviso_exibido = True  # Marcar que o aviso foi exibido
+                            st.session_state.aviso_exibido = True  
                         elif st.session_state.angle >= angulo_minimo and st.session_state.angle <= angulo_maximo:
-                            st.session_state.aviso_exibido = False  # Resetar a flag quando o ângulo estiver dentro do limite
+                            st.session_state.aviso_exibido = False  
 
-                    # Atualizar contadores na interface
-                    # rep_counter.write(f'Contagem: {counter}')
                     stage_text.write(f'Estágio: {stage}')
 
                 except Exception as e:
@@ -498,16 +447,10 @@ def pagina_consulta():
 
 
 
-# def encerrar_sessao():
-#     # Função para encerrar a sessão
-#     st.session_state.pagina_atual = "usuarios"
-#     st.rerun()
-
-
 def calculate_angle(a, b, c):
-    a = np.array(a)  # primeiro ponto
-    b = np.array(b)  # segundo ponto
-    c = np.array(c)  # terceiro ponto
+    a = np.array(a) 
+    b = np.array(b)  
+    c = np.array(c)  
 
     rad = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
     angle = np.abs(rad * 180.0 / np.pi)
@@ -517,20 +460,17 @@ def calculate_angle(a, b, c):
 
     return angle
 
-    # Função para redimensionar frames
 def resize_frame(frame, width, height):
     return cv2.resize(frame, (width, height))
 
 def cancela_sessao():
     pass
 
-# Função para adicionar uma nova linha à tabela
 def gravar_dados(tempo, posicao, angulo):
     nova_linha = {"Tempo (s)": tempo, "Posição": posicao, "Ângulo (graus)": angulo}
     st.session_state.data_table = pd.concat([st.session_state.data_table, pd.DataFrame([nova_linha])], ignore_index=True)
 
 
-# Função para gravar os dados da série na tabela e enviar para a API
 def gravar_serie(sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equipamento, angulo_coletado):
     nova_linha = {
         "sessao_id": sessao_id,
@@ -542,9 +482,7 @@ def gravar_serie(sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equi
         "equipamento": equipamento,
         "angulo_coletado": angulo_coletado
     }
-    # st.write(nova_linha)
-    # Enviar os dados para a API (substitua com sua URL real)
-    url_api = "http://127.0.0.1:8000/home/api/serie/gravar"  # A URL para a rota que grava os dados
+    url_api = "http://127.0.0.1:8000/home/api/serie/gravar" 
     response = requests.post(url_api, json=nova_linha)
 
     if response.status_code == 200:
@@ -553,6 +491,5 @@ def gravar_serie(sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equi
     else:
         st.error("Erro ao gravar a série na API.")
 
-    nova_linha_df = pd.DataFrame([nova_linha])  # Converter nova_linha em DataFrame
-    st.session_state.serie_table = pd.concat([st.session_state.serie_table, nova_linha_df], ignore_index=True)  # Usar pd.concat para adicionar nova linha
-    # st.session_state.numero_serie += 1  # Incrementar o número da série
+    nova_linha_df = pd.DataFrame([nova_linha])  
+    st.session_state.serie_table = pd.concat([st.session_state.serie_table, nova_linha_df], ignore_index=True)  

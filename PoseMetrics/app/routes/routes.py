@@ -13,6 +13,8 @@ import base64
 
 router = APIRouter(prefix="/home", tags=["home"])
 
+#Classes MOdelos do Pydantic
+
 class Paciente(BaseModel):
     id: int
     nome: str
@@ -80,11 +82,13 @@ class SeriePayload(BaseModel):
     sessao_id: int
     exercicio_id: int
     numero_serie: int
-    tempo: float  # Tempo da série (em minutos ou segundos, dependendo do que você está utilizando)
-    ponto: str  # Ponto (por exemplo, "Cima" ou "Baixo")
-    peso: float  # Peso utilizado
-    equipamento: str  # Equipamento utilizado (ex: "halteres", "barra", etc.)
-    angulo_coletado: float  # Ângulo coletado durante o exercício
+    tempo: float  
+    ponto: str  
+    peso: float  
+    equipamento: str  
+    angulo_coletado: float  
+
+
 
 @router.get("/{email_profissional}")
 def obter_profissional(email_profissional: str):
@@ -100,6 +104,8 @@ def obter_profissional(email_profissional: str):
         return profissional
     finally:
         conn.close()
+
+
 
 @router.get("/{email_profissional}/proximos_pacientes")
 def obter_pacientes(email_profissional: str):
@@ -118,8 +124,6 @@ def obter_pacientes(email_profissional: str):
         return pacientes
     finally:
         conn.close()
-
-
 
 
 
@@ -143,29 +147,24 @@ def obter_pacientes(email_profissional: str):
 
 
 
-
 @router.put("/{paciente_id}")
 def editar_paciente(paciente_id: int, paciente: PacienteUpdate):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Cria dinamicamente a lista de campos e valores a serem atualizados
             campos = []
             valores = []
             for campo, valor in paciente.dict(exclude_unset=True).items():
                 campos.append(f"{campo} = %s")
                 valores.append(valor)
             
-            # Certifica-se de que há pelo menos um campo para atualizar
             if not campos:
                 raise HTTPException(
                     status_code=400, detail="Nenhum campo válido para atualizar."
                 )
 
-            # Adiciona o ID do paciente aos valores
             valores.append(paciente_id)
 
-            # Monta a query dinamicamente
             query = f"""
                 UPDATE pacientes
                 SET {', '.join(campos)}
@@ -180,8 +179,6 @@ def editar_paciente(paciente_id: int, paciente: PacienteUpdate):
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()
-
-
 
 
 
@@ -235,9 +232,6 @@ async def adicionar_paciente(
 
 
 
-
-
-
 @router.get("/paciente/{paciente_id}")
 def get_paciente(paciente_id: int):
     conn = get_db_connection()
@@ -255,11 +249,10 @@ def get_paciente(paciente_id: int):
             raise HTTPException(status_code=404, detail="Paciente não encontrado")
         
         foto_base64 = None
-        if paciente[12]:  # paciente[12] é a coluna `foto`
+        if paciente[12]:  
             foto_base64 = base64.b64encode(paciente[12]).decode("utf-8")
                     
 
-        # Retornar os dados como um dicionário
         return {
             "id": paciente[0],
             "nome": paciente[1],
@@ -279,10 +272,6 @@ def get_paciente(paciente_id: int):
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()
-
-
-
-
 
 
 
@@ -306,28 +295,25 @@ def listar_exercicios():
         conn.close()
 
 
+
 @router.put("/{email_profissional}/exercicios/{exercicio_id}")
 def editar_exercicio(exercicio_id: int, exercicio: ExercicioUpdate):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Cria dinamicamente a lista de campos e valores a serem atualizados
             campos = []
             valores = []
             for campo, valor in exercicio.dict(exclude_unset=True).items():
                 campos.append(f"{campo} = %s")
                 valores.append(valor)
             
-            # Certifica-se de que há pelo menos um campo para atualizar
             if not campos:
                 raise HTTPException(
                     status_code=400, detail="Nenhum campo válido para atualizar."
                 )
 
-            # Adiciona o ID do exercício aos valores
             valores.append(exercicio_id)
 
-            # Monta a query dinamicamente
             query = f"""
                 UPDATE Exercicios
                 SET {', '.join(campos)}
@@ -345,16 +331,11 @@ def editar_exercicio(exercicio_id: int, exercicio: ExercicioUpdate):
 
 
 
-
-
-
-
 @router.post("/{email_profissional}/exercicios/criar_exercicio")
 def adicionar_exercicio(exercicio: ExercicioCreate):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Cria o INSERT para o novo exercício
             cur.execute("""
                 INSERT INTO Exercicios 
                 (nome, grupo_muscular, lado, x1, x2, x3, angulo_minimo_exercicio, angulo_maximo_exercicio, descricao, tipo)
@@ -409,19 +390,16 @@ def listar_sessoes_paciente(paciente_id: int):
 
 @router.get("/series/filtrar/{sessao_ids}")
 def filtrar_series(sessao_ids: str):
-    # Convertendo a string de IDs recebida na URL para uma lista de inteiros
-    ids = [int(id) for id in sessao_ids.split(',')]  # Converte a string separada por vírgulas para uma lista de inteiros
+    ids = [int(id) for id in sessao_ids.split(',')]  
     
-    # Conectar ao banco de dados
     conn = get_db_connection()
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Buscando as séries associadas aos IDs das sessões
             cur.execute("""
                 SELECT id, sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equipamento, angulo_coletado
                 FROM Serie
                 WHERE sessao_id IN %s
-            """, (tuple(ids),))  # Passa a lista de IDs como uma tupla para o SQL
+            """, (tuple(ids),)) 
             series = cur.fetchall()
 
         if not series:
@@ -433,16 +411,13 @@ def filtrar_series(sessao_ids: str):
         conn.close()
 
 
+
 @router.get("/exercicios/filtrar/{exercicio_ids}")
 def filtrar_exercicios(exercicio_ids: str):
-    # Aqui você vai fazer o processo de buscar os exercícios no banco de dados
-    # com base no exercicio_ids passado.
     ids = [int(id) for id in exercicio_ids.split(',')] 
-    # Conectar ao banco de dados
     conn = get_db_connection()
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Buscando os exercícios pelos IDs
             cur.execute("""
                 SELECT id, nome, grupo_muscular, lado, descricao
                 FROM Exercicios
@@ -460,14 +435,12 @@ def filtrar_exercicios(exercicio_ids: str):
 
 
 
-
 @router.post("/sessoes/iniciar")
 def iniciar_ou_atualizar_sessao(payload: SessaoPayload):
     conn = get_db_connection()
     try:
-        hoje = date.today()  # Data atual
+        hoje = date.today() 
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Verificar se já existe uma sessão para o dia atual
             cur.execute("""
                 SELECT id FROM Sessoes
                 WHERE paciente_id = %s AND DATE(data_sessao) = %s
@@ -476,7 +449,6 @@ def iniciar_ou_atualizar_sessao(payload: SessaoPayload):
             sessao_existente = cur.fetchone()
             
             if sessao_existente:
-                # Atualizar sessão existente
                 sessao_id = sessao_existente["id"]
                 cur.execute("""
                     UPDATE Sessoes
@@ -486,7 +458,6 @@ def iniciar_ou_atualizar_sessao(payload: SessaoPayload):
                 conn.commit()
                 return {"message": "Sessão atualizada com sucesso.", "sessao_id": sessao_id}
             else:
-                # Criar nova sessão
                 cur.execute("""
                     INSERT INTO Sessoes (paciente_id, data_sessao, tempo_total, massa, altura)
                     VALUES (%s, NOW(), %s, %s, %s)
@@ -502,19 +473,18 @@ def iniciar_ou_atualizar_sessao(payload: SessaoPayload):
         conn.close()
 
 
+
 @router.put("/sessoes/concluir")
 def concluir_sessao(payload: ConcluirSessaoPayload):
     conn = get_db_connection()
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Verificar se a sessão existe
             cur.execute("SELECT id FROM Sessoes WHERE id = %s", (payload.sessao_id,))
             sessao = cur.fetchone()
 
             if not sessao:
                 raise HTTPException(status_code=404, detail="Sessão não encontrada.")
 
-            # Atualizar a sessão com o tempo total e as observações
             cur.execute("""
                 UPDATE Sessoes
                 SET tempo_total = %s, observacoes = %s
@@ -531,12 +501,10 @@ def concluir_sessao(payload: ConcluirSessaoPayload):
 
 
 
-
 @router.post("/api/serie/gravar")
 def gravar_serie(serie: SeriePayload):
-    conn = get_db_connection()  # Função para obter a conexão com o banco de dados
+    conn = get_db_connection()  
     try:
-        # Inserir os dados da nova série na tabela Serie
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
                 INSERT INTO Serie (sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equipamento, angulo_coletado)
@@ -561,7 +529,7 @@ def gravar_serie(serie: SeriePayload):
         }
     
     except Exception as e:
-        conn.rollback()  # Em caso de erro, desfazer a operação
+        conn.rollback()  
         raise HTTPException(status_code=400, detail=str(e))
     
     finally:

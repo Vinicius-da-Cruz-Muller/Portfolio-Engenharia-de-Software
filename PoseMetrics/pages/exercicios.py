@@ -26,8 +26,6 @@ def exibir_exercicios():
             menu_title = None,
             options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
             icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
-            # menu_icon="menu-button-wide-fill", 
-            # default_index=0
             styles={
             "container": {"background-color": "#4E937A60"},  
             "icon": {"color": "#A22C29", "font-size": "20px"},  
@@ -67,9 +65,6 @@ def exibir_exercicios():
     if selected == "Sobre":
         st.session_state.pagina_atual = "sobre"
         st.rerun()
-    # if selected == "Sobre":
-    #     github_url = "https://github.com/Vinicius-da-Cruz-Muller"  # Substitua pelo link do seu GitHub
-    #     webbrowser.open_new_tab(github_url)
 
     
 
@@ -107,28 +102,21 @@ def exibir_exercicios():
         st.title("Gerenciar Exercícios")
         
         with st.expander("Listar Exercícios", expanded=False):
-        # Sessão para listar e editar exercícios
             st.subheader("Exercícios Cadastrados")
             response_exercicios = requests.get("http://127.0.0.1:8000/home/{profissional_email}/exercicios")
             if response_exercicios.status_code == 200:
                 exercicios = response_exercicios.json()
                 df_exercicios = pd.DataFrame(exercicios)
                 st.dataframe(df_exercicios)
-                # exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
 
 
         with st.expander("Editar Exercício", expanded=False):
-        # Sessão para listar e editar exercícios
             st.subheader("Exercícios Cadastrados")
             response_exercicios = requests.get("http://127.0.0.1:8000/home/{profissional_email}/exercicios")
             if response_exercicios.status_code == 200:
                 exercicios = response_exercicios.json()
                 df_exercicios = pd.DataFrame(exercicios)
-                # st.dataframe(df_exercicios)
-                # exercicio_selecionado = st.selectbox("Selecione o exercício", [e['nome'] for e in exercicios])
 
-
-                # Selecionar exercício para edição
                 exercicio_selecionado = st.selectbox("Selecione um exercício para editar:", df_exercicios["nome"])
                 if exercicio_selecionado:
                     exercicio = df_exercicios[df_exercicios["nome"] == exercicio_selecionado].iloc[0]
@@ -142,7 +130,7 @@ def exibir_exercicios():
                             min_value=0,
                             max_value=180,
                             step=1,
-                            value=int(exercicio["angulo_minimo_exercicio"])  # Converte para inteiro
+                            value=int(exercicio["angulo_minimo_exercicio"]) 
                         )
 
                         angulo_maximo_edit = st.number_input(
@@ -150,37 +138,36 @@ def exibir_exercicios():
                             min_value=0,
                             max_value=180,
                             step=1,
-                            value=int(exercicio["angulo_maximo_exercicio"])  # Converte para inteiro
+                            value=int(exercicio["angulo_maximo_exercicio"])  
                         )
 
                         x1_edit = st.number_input(
                             "Ponto X1 (Mediapipe):",
                             min_value=0,
                             step=1,
-                            value=int(exercicio["x1"])  # Converte para inteiro
+                            value=int(exercicio["x1"])  
                         )
 
                         x2_edit = st.number_input(
                             "Ponto X2 (Mediapipe):",
                             min_value=0,
                             step=1,
-                            value=int(exercicio["x2"])  # Converte para inteiro
+                            value=int(exercicio["x2"])  
                         )
 
                         x3_edit = st.number_input(
                             "Ponto X3 (Mediapipe):",
                             min_value=0,
                             step=1,
-                            value=int(exercicio["x3"])  # Converte para inteiro
+                            value=int(exercicio["x3"])  
                         )
                         descricao_edit = st.text_area("Descrição do exercício:", exercicio["descricao"])
                         tipo_opcoes = ["Força", "Flexibilidade", "Resistência", "Outro"]
 
-                        # Verifica se o tipo está na lista de opções, caso contrário, define "Outro" como valor padrão
                         tipo_edit = st.selectbox(
                             "Tipo:",
                             tipo_opcoes,
-                            index=tipo_opcoes.index(exercicio["tipo"]) if exercicio["tipo"] in tipo_opcoes else 3  # Índice de "Outro"
+                            index=tipo_opcoes.index(exercicio["tipo"]) if exercicio["tipo"] in tipo_opcoes else 3  
                         )
                         submit_editar = st.form_submit_button("Salvar Alterações")
 
@@ -207,7 +194,6 @@ def exibir_exercicios():
                 st.error("Erro ao carregar lista de exercícios.")
 
         with st.expander("Adicionar Exercício", expanded=False):
-        # Sessão para adicionar novo exercício
             st.subheader("Adicionar Novo Exercício")
             with st.form(key="adicionar_exercicio"):
                 nome = st.text_input("Nome do exercício:")
@@ -242,8 +228,6 @@ def exibir_exercicios():
                     else:
                         st.error("Erro ao adicionar exercício.")
             
-        
-        
     
     with col2:
         st.markdown(
@@ -258,12 +242,8 @@ def exibir_exercicios():
             unsafe_allow_html=True,
         )
 
-
-
-        # Adiciona um espaçamento
         st.markdown("<br><br>", unsafe_allow_html=True)
         
-        # Título para a nova seção
         st.markdown(
             """
             <h3 style="text-align: left; margin-bottom: 20px;">Índice de Pontos</h3>
@@ -271,7 +251,6 @@ def exibir_exercicios():
             unsafe_allow_html=True,
         )
         
-        # Adiciona a imagem abaixo do título
         st.image("pose_landmarks_index.png", use_container_width=True)
         st.write("Utilize o índice de pontos para entender o correto acompanhamento do movimento do paciente.")
         st.write("O PoseMetrics se baseia em uma lógica de três pontos para calcular os ângulos dos membros aferidos e utilizar os dados coletados nas análises do paciente. Não utilize pontos muito afastados ou que não pertençam ao mesmo grupo muscular, pois isso pode afetar a acurácia da análise visual.")

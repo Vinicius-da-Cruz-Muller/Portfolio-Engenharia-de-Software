@@ -30,7 +30,6 @@ def exibir_login():
                     st.error("E-mail ou senha inválidos.")
             else:
                 st.error(response.json().get("detail", "Erro ao se comunicar com o servidor."))
-    # Exibe "Novo aqui?" como texto
         st.markdown("Novo aqui?")
 
         if st.button("Cadastrar"):

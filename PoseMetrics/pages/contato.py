@@ -23,8 +23,6 @@ def exibir_contato():
             menu_title = None,
             options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
             icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
-            # menu_icon="menu-button-wide-fill", 
-            # default_index=0
             styles={
             "container": {"background-color": "#4E937A60"},  
             "icon": {"color": "#A22C29", "font-size": "20px"},  

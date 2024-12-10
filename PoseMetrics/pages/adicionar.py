@@ -4,7 +4,6 @@ from streamlit_option_menu import option_menu
 import time
 
 
-# Função para adicionar um novo paciente
 def adicionar_novo_paciente():
     st.markdown(
     """
@@ -26,8 +25,6 @@ def adicionar_novo_paciente():
             menu_title = None,
             options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
             icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
-            # menu_icon="menu-button-wide-fill", 
-            # default_index=0
             styles={
             "container": {"background-color": "#4E937A60"},  
             "icon": {"color": "#A22C29", "font-size": "20px"},  
@@ -91,9 +88,9 @@ def adicionar_novo_paciente():
             st.error("Erro ao carregar as informações do profissional.")
             return
         
-        st.title("Adicionar Novo Paciente")  # Título da página
+        st.title("Adicionar Novo Paciente") 
         
-        with st.form("my_form"):  # Formulário para inserção dos dados
+        with st.form("my_form"):  
             nome = st.text_input("Nome")
             telefone = st.text_input("Telefone")
             email = st.text_input("E-mail")
@@ -107,7 +104,6 @@ def adicionar_novo_paciente():
             hora_prox_sessao = st.text_input("Horário da Próxima Sessão (HH:MM)")
             foto = st.file_uploader("Foto do Paciente", type=["jpg", "jpeg", "png"])
             
-            # Botão para enviar o formulário
             submitted = st.form_submit_button("Adicionar Paciente")
             
             if submitted:
@@ -116,7 +112,6 @@ def adicionar_novo_paciente():
                 else:
 
                     foto_bytes = foto.read() if foto else None
-                    # Preparar os dados para enviar
                     paciente_data = {
                         "nome": nome,
                         "telefone": telefone,
@@ -133,7 +128,6 @@ def adicionar_novo_paciente():
                     }
                     
                     files = {"foto": ("foto.jpg", foto_bytes, "image/jpeg")} if foto_bytes else None
-                    # Fazer a requisição para a API
                     response = requests.post(
                         f"http://127.0.0.1:8000/home/{profissional_email}/adicionar_paciente",
                         data=paciente_data,
@@ -164,8 +158,5 @@ def adicionar_novo_paciente():
         )
 
 
-
-
-# Chamar a função para adicionar paciente
 if __name__ == "__main__":
     adicionar_novo_paciente()

@@ -29,8 +29,6 @@ def exibir_pacientes():
             menu_title = None,
             options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
             icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
-            # menu_icon="menu-button-wide-fill", 
-            # default_index=0
             styles={
             "container": {"background-color": "#4E937A60"},  
             "icon": {"color": "#A22C29", "font-size": "20px"},  
@@ -116,8 +114,6 @@ def exibir_pacientes():
             st.error("Erro ao carregar a lista de pacientes.")
 
         
-
-
     with col2:
         st.markdown(
             f"""
@@ -166,7 +162,6 @@ def editar_paciente(paciente):
         st.session_state["modo_edicao"] = False
 
     if st.session_state["modo_edicao"]:
-        # Campos editáveis
         campos = {
             "nome": st.text_input("Nome", paciente.get("nome", "")),
             "telefone": st.text_input("Telefone", paciente.get("telefone", "")),

@@ -24,15 +24,12 @@ def exibir_indicadores():
 )
     
     
-
     with st.sidebar:
         st.logo("posemetrics_logo.png", size="large", link=None, icon_image=None)
         selected = option_menu(
             menu_title = None,
             options = ["Home", "Indicadores", "Exercícios", "Pacientes", "Consulta", "Relatórios", "Configurações", "Contato", "Sobre"],
             icons=['house', 'graph-up-arrow', 'heart-pulse', 'people', 'calendar2-heart', 'bar-chart', 'gear', 'github', 'question-circle'], 
-            # menu_icon="menu-button-wide-fill", 
-            # default_index=0
             styles={
             "container": {"background-color": "#4E937A60"},  
             "icon": {"color": "#A22C29", "font-size": "20px"},  
@@ -72,11 +69,7 @@ def exibir_indicadores():
     if selected == "Sobre":
         st.session_state.pagina_atual = "sobre"
         st.rerun()
-    # if selected == "Sobre":
-    #     github_url = "https://github.com/Vinicius-da-Cruz-Muller"  # Substitua pelo link do seu GitHub
-    #     webbrowser.open_new_tab(github_url)
 
-    
 
     col1, col2 = st.columns([0.8, 0.2])
 
@@ -117,14 +110,10 @@ def exibir_indicadores():
             if pacientes:
                 df_pacientes = pd.DataFrame(pacientes)
                 pacientes_ativos = df_pacientes[df_pacientes['status'] == True]
-                # Colunas que você deseja exibir
-                colunas_exibir = ['nome', 'endereco', 'telefone', 'condicao']  # Substitua pelos nomes das colunas desejadas
-
-                # Verificando se as colunas existem no DataFrame para evitar erros
+                colunas_exibir = ['nome', 'endereco', 'telefone', 'condicao'] 
                 colunas_existentes = [col for col in colunas_exibir if col in df_pacientes.columns]
                 df_exibir = pacientes_ativos[colunas_exibir]
 
-                # Exibindo apenas as colunas selecionadas
                 with st.expander("Seus pacientes", expanded = False):
                     st.dataframe(df_exibir)
 
@@ -137,13 +126,10 @@ def exibir_indicadores():
                         st.warning(f"Endereço inválido ou não encontrado: {endereco}")
 
 
-                # Contando pacientes ativos
                 pacientes_ativos = df_pacientes[df_pacientes['status'] == True].shape[0]
 
-                # Obtendo condições únicas
                 condicoes_tratadas = df_pacientes['condicao'].unique()
 
-                # Exibindo os resultados
                 col_total, col_condicao = st.columns([0.2, 0.8])
                 with col_total:
                     st.write(f"Total de pacientes ativos: {pacientes_ativos}")
@@ -154,33 +140,18 @@ def exibir_indicadores():
                             st.write(f"- {condicao}")
 
                 if valid_coords:
-                    # Criação do mapa centrado na média das coordenadas validadas
                     mean_lat = sum(coord[0] for coord in valid_coords) / len(valid_coords)
                     mean_lon = sum(coord[1] for coord in valid_coords) / len(valid_coords)
                     mapa = folium.Map(location=[mean_lat, mean_lon], zoom_start=12)
 
-                    # Adicionando marcadores para cada coordenada válida
                     for coord in valid_coords:
                         folium.Marker(location=coord, icon=folium.Icon(color='blue')).add_to(mapa)
 
-                    # Exibindo o mapa no Streamlit
                     st.subheader("Mapa de Pacientes")
                     st.components.v1.html(mapa._repr_html_(), height=600)
                     st.write("Utilize o mapa para verificar sua área de atuação. Clima ruim e distância do consultório são fatores relevantes na assiduidade e pontualidade do tratamento fisioterápico.")
                 else:
                     st.warning("Não foi possível encontrar nenhum endereço válido para os pacientes.")
-
-                
-                # # Exibindo mapa de calor
-                # if valid_coords:
-                #     mapa = folium.Map(location=[df_pacientes['latitude'].mean(), df_pacientes['longitude'].mean()], zoom_start=12)
-                #     HeatMap(valid_coords).add_to(mapa)
-                #     st.write("Mapa de Densidade de Pacientes")
-                #     st.components.v1.html(mapa._repr_html_(), height=600)
-                # else:
-                #     st.warning("Não foi possível encontrar nenhum endereço válido para os pacientes.")
-
-                    
             else:
                 st.write("Não há pacientes agendados para este profissional.")
         else:
@@ -201,28 +172,28 @@ def exibir_indicadores():
         )
 
         st.markdown("<br><br>", unsafe_allow_html=True)    
-        # clima = obter_clima(CIDADE, API_KEY)
+        clima = obter_clima(CIDADE, API_KEY)
         
-        # if clima:
-        #     temperatura = clima['main']['temp']
-        #     descricao = clima['weather'][0]['description']
-        #     icone = clima['weather'][0]['icon']
-        #     icone_url = f"http://openweathermap.org/img/wn/{icone}.png"
+        if clima:
+            temperatura = clima['main']['temp']
+            descricao = clima['weather'][0]['description']
+            icone = clima['weather'][0]['icon']
+            icone_url = f"http://openweathermap.org/img/wn/{icone}.png"
 
-        #     st.markdown(
-        #     f"""
-        #     <div style="text-align: center; "background-color: #f0f0f0;">
-        #         <img src="{icone_url}" width="80">
-        #         <p><strong>Cidade:</strong> {CIDADE}</p>
-        #         <p><strong>Temperatura:</strong> {temperatura}°C</p>
-        #         <p><strong>Descrição:</strong> {descricao.capitalize()}</p>
-        #     </div>
-        #     </div>
-        #     """,
-        #     unsafe_allow_html=True,
-        # )
-        # else:
-        #     st.error("Não foi possível obter os dados climáticos.")
+            st.markdown(
+            f"""
+            <div style="text-align: center; "background-color: #f0f0f0;">
+                <img src="{icone_url}" width="80">
+                <p><strong>Cidade:</strong> {CIDADE}</p>
+                <p><strong>Temperatura:</strong> {temperatura}°C</p>
+                <p><strong>Descrição:</strong> {descricao.capitalize()}</p>
+            </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        else:
+            st.error("Não foi possível obter os dados climáticos.")
 
 
     st.markdown(
