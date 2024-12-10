@@ -172,13 +172,13 @@ def exibir_relatorio():
                                 )
                                 
 
-                                st.write("Duração das sessões")
+                                st.subheader("Duração das sessões")
                                 df_sessoes['data_sessao'] = pd.to_datetime(df_sessoes['data_sessao'])
                                 df_sessoes_grouped = df_sessoes.groupby('data_sessao')['tempo_total'].sum().reset_index()
                                 st.line_chart(df_sessoes_grouped.set_index('data_sessao')['tempo_total'])
 
 
-                                st.write("Acompanhamento por sessão")
+                                st.subheader("Acompanhamento por sessão")
 
                                 col3, col4 = st.columns([0.6, 0.4])
                                 with col3:
@@ -194,7 +194,7 @@ def exibir_relatorio():
 
                                 df_series_selecionada = df_series_selecionada.sort_values(by='tempo')
 
-                                df_series_selecionada['ponto_numeric'] = df_series_selecionada['ponto'].apply(lambda x: 1 if x == 'Cima' else 0)
+                                df_series_selecionada['ponto_numeric'] = df_series_selecionada['ponto'].apply(lambda x: 1 if (x == 'Cima' or x == 'cima') else 0)
 
                                 st.line_chart(df_series_selecionada.set_index('tempo')['ponto_numeric'], use_container_width=True)
 

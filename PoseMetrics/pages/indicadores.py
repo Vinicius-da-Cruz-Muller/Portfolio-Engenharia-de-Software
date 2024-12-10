@@ -166,18 +166,19 @@ def exibir_indicadores():
                     # Exibindo o mapa no Streamlit
                     st.subheader("Mapa de Pacientes")
                     st.components.v1.html(mapa._repr_html_(), height=600)
+                    st.write("Utilize o mapa para verificar sua área de atuação. Clima ruim e distância do consultório são fatores relevantes na assiduidade e pontualidade do tratamento fisioterápico.")
                 else:
                     st.warning("Não foi possível encontrar nenhum endereço válido para os pacientes.")
 
                 
-                # Exibindo mapa de calor
-                if valid_coords:
-                    mapa = folium.Map(location=[df_pacientes['latitude'].mean(), df_pacientes['longitude'].mean()], zoom_start=12)
-                    HeatMap(valid_coords).add_to(mapa)
-                    st.write("Mapa de Densidade de Pacientes")
-                    st.components.v1.html(mapa._repr_html_(), height=600)
-                else:
-                    st.warning("Não foi possível encontrar nenhum endereço válido para os pacientes.")
+                # # Exibindo mapa de calor
+                # if valid_coords:
+                #     mapa = folium.Map(location=[df_pacientes['latitude'].mean(), df_pacientes['longitude'].mean()], zoom_start=12)
+                #     HeatMap(valid_coords).add_to(mapa)
+                #     st.write("Mapa de Densidade de Pacientes")
+                #     st.components.v1.html(mapa._repr_html_(), height=600)
+                # else:
+                #     st.warning("Não foi possível encontrar nenhum endereço válido para os pacientes.")
 
                     
             else:
@@ -198,6 +199,54 @@ def exibir_indicadores():
             """,
             unsafe_allow_html=True,
         )
+
+        st.markdown("<br><br>", unsafe_allow_html=True)    
+        # clima = obter_clima(CIDADE, API_KEY)
+        
+        # if clima:
+        #     temperatura = clima['main']['temp']
+        #     descricao = clima['weather'][0]['description']
+        #     icone = clima['weather'][0]['icon']
+        #     icone_url = f"http://openweathermap.org/img/wn/{icone}.png"
+
+        #     st.markdown(
+        #     f"""
+        #     <div style="text-align: center; "background-color: #f0f0f0;">
+        #         <img src="{icone_url}" width="80">
+        #         <p><strong>Cidade:</strong> {CIDADE}</p>
+        #         <p><strong>Temperatura:</strong> {temperatura}°C</p>
+        #         <p><strong>Descrição:</strong> {descricao.capitalize()}</p>
+        #     </div>
+        #     </div>
+        #     """,
+        #     unsafe_allow_html=True,
+        # )
+        # else:
+        #     st.error("Não foi possível obter os dados climáticos.")
+
+
+    st.markdown(
+    """
+    <style>
+        /* Estilo do footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #4E937A70;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+    <div class="footer">
+        PoseMetrics © 2024 - Todos os direitos reservados
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 def geocode_address(address):

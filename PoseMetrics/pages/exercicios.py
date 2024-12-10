@@ -266,10 +266,35 @@ def exibir_exercicios():
         # Título para a nova seção
         st.markdown(
             """
-            <h3 style="text-align: center; margin-bottom: 20px;">Índice de Pontos</h3>
+            <h3 style="text-align: left; margin-bottom: 20px;">Índice de Pontos</h3>
             """,
             unsafe_allow_html=True,
         )
         
         # Adiciona a imagem abaixo do título
         st.image("pose_landmarks_index.png", use_container_width=True)
+        st.write("Utilize o índice de pontos para entender o correto acompanhamento do movimento do paciente.")
+        st.write("O PoseMetrics se baseia em uma lógica de três pontos para calcular os ângulos dos membros aferidos e utilizar os dados coletados nas análises do paciente. Não utilize pontos muito afastados ou que não pertençam ao mesmo grupo muscular, pois isso pode afetar a acurácia da análise visual.")
+
+        st.markdown(
+    """
+    <style>
+        /* Estilo do footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #4E937A70;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+    <div class="footer">
+        PoseMetrics © 2024 - Todos os direitos reservados
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

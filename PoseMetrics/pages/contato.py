@@ -65,7 +65,7 @@ def exibir_contato():
         st.session_state.pagina_atual = "sobre"
         st.rerun()
 
-    st.title("Entre em Contato")
+    st.title("Entre em Contato!")
 
     st.markdown(
         """
@@ -104,7 +104,8 @@ def exibir_contato():
             <a href="https://www.instagram.com/viniciuscmuller/" target="_blank" class="contact-button instagram">
                 Instagram
             </a>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p>Me acompanhe no Instagram!</p>
+            <p>Quer saber mais sobre mim e acompanhar minhas atualizações? Busque terapia!</p>
             """,
             unsafe_allow_html=True,
         )
@@ -116,7 +117,8 @@ def exibir_contato():
             <a href="https://www.linkedin.com/in/vin%C3%ADcius-da-cruz-muller-738784170/" target="_blank" class="contact-button linkedin">
                 LinkedIn
             </a>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p>Conecte-se comigo no LinkedIn!</P>
+            <p>Quer saber mais sobre minha trajetória profissional e projetos? Vamos nos conectar no LinkedIn!</p>
             """,
             unsafe_allow_html=True,
         )
@@ -128,7 +130,8 @@ def exibir_contato():
             <a href="https://github.com/Vinicius-da-Cruz-Muller" target="_blank" class="contact-button github">
                 GitHub
             </a>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p>Confira meus projetos no GitHub!</p>
+            <p>Explore meus repositórios e veja o que tenho desenvolvido!</p>
             """,
             unsafe_allow_html=True,
         )

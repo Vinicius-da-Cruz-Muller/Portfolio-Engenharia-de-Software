@@ -95,7 +95,7 @@ def pagina_consulta():
         
 
         # st.image(foto_profissional, width=100)
-        st.write(f"{nome_profissional}, escolha um paciente para iniciar uma consulta.")
+        st.write(f"{nome_profissional}, escolha um paciente para iniciar uma consulta, altere as informações se necessário e inicie uma sessão para coletar dados do paciente.")
     else:
         st.error("Erro ao carregar as informações do profissional.")
         return
@@ -136,8 +136,7 @@ def pagina_consulta():
                         ultima_massa = ultima_sessao.get('massa')
                         ultima_altura = ultima_sessao.get('altura')
                         
-                        st.info(f"Últimos dados encontrados para {paciente_nome}:")
-                        st.write(f"Altura: {ultima_altura} cm, Massa: {ultima_massa} kg")
+                        st.info(f"Últimos dados encontrados para {paciente_nome} -> Altura: {ultima_altura} cm, Massa: {ultima_massa} kg")
                     else:
                         st.warning(f"Nenhuma sessão encontrada para {paciente_nome}. Preencha os dados abaixo.")
                 else:
@@ -168,7 +167,7 @@ def pagina_consulta():
     
     
 
-    st.subheader("Monitoramento de Exercício")
+    # st.subheader("Monitoramento de Exercício")
     if 'mostrar_equipamento' not in st.session_state:
         st.session_state.mostrar_equipamento = False
 
@@ -293,7 +292,7 @@ def pagina_consulta():
         st.session_state.running = False
 
     if st.session_state.mostrar_equipamento:
-        st.subheader("Configuração do Equipamento")
+        # st.subheader("Configuração do Equipamento")
 
         col_exercicios, col_equipamento, col_peso = st.columns([0.6, 0.2, 0.2])
 
@@ -543,13 +542,14 @@ def gravar_serie(sessao_id, exercicio_id, numero_serie, tempo, ponto, peso, equi
         "equipamento": equipamento,
         "angulo_coletado": angulo_coletado
     }
-    st.write(nova_linha)
+    # st.write(nova_linha)
     # Enviar os dados para a API (substitua com sua URL real)
     url_api = "http://127.0.0.1:8000/home/api/serie/gravar"  # A URL para a rota que grava os dados
     response = requests.post(url_api, json=nova_linha)
 
     if response.status_code == 200:
-        st.success("Série gravada com sucesso!")
+        # st.success("Série gravada com sucesso!")
+        pass
     else:
         st.error("Erro ao gravar a série na API.")
 

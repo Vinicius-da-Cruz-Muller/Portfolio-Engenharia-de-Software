@@ -131,6 +131,29 @@ def exibir_pacientes():
             unsafe_allow_html=True,
         )
 
+        st.markdown(
+    """
+    <style>
+        /* Estilo do footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #4E937A70;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+    <div class="footer">
+        PoseMetrics © 2024 - Todos os direitos reservados
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 
 
@@ -147,6 +170,9 @@ def editar_paciente(paciente):
         campos = {
             "nome": st.text_input("Nome", paciente.get("nome", "")),
             "telefone": st.text_input("Telefone", paciente.get("telefone", "")),
+            "ultima_sessao": st.date_input(
+                "Última sessão", pd.to_datetime(paciente.get("ultima_sessao", pd.Timestamp.now()))
+            ),
             "prox_sessao": st.date_input(
                 "Próxima Sessão", pd.to_datetime(paciente.get("prox_sessao", pd.Timestamp.now()))
             ),
@@ -170,6 +196,7 @@ def editar_paciente(paciente):
 
         if st.button("Salvar Alterações"):
             campos["prox_sessao"] = str(campos["prox_sessao"])
+            campos["ultima_sessao"] = str(campos["ultima_sessao"])
             campos["data_nascimento"] = str(campos["data_nascimento"])
             campos["inicio_tratamento"] = str(campos["inicio_tratamento"])
             campos["fim_tratamento"] = str(campos["fim_tratamento"])
@@ -227,6 +254,7 @@ def exibir_ficha_paciente(paciente):
         st.markdown(f"**E-mail:** {paciente.get('email', '')}")
         st.markdown(f"**Endereço:** {paciente.get('endereco', '')}")
         st.markdown(f"**Fim do Tratamento:** {paciente.get('fim_tratamento', '')}")
+        st.markdown(f"**Última Sessão:** {paciente.get('ultima_sessao', '')}")
         st.markdown(f"**Próxima Sessão:** {paciente.get('prox_sessao', '')}")
         
 
