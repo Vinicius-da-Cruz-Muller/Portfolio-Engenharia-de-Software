@@ -21,7 +21,7 @@
 
 
                                 # Evolução de massa e altura por data de sessão
-                                df_progresso = dataset.groupby('data_sessao')[['massa', 'altura']].mean().reset_index()
+                                df_progresso = dataset.groupby('data_sessao')[['massa']].mean().reset_index()
 
                                 # Gráfico de evolução de massa e altura
                                 st.line_chart(df_progresso.set_index('data_sessao'))

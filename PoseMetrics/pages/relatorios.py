@@ -164,6 +164,17 @@ def exibir_relatorio():
                                 df_sessoes['data_sessao'] = pd.to_datetime(df_sessoes['data_sessao'])
                                 df_sessoes_grouped = df_sessoes.groupby('data_sessao')['tempo_total'].sum().reset_index()
                                 st.line_chart(df_sessoes_grouped.set_index('data_sessao')['tempo_total'])
+                            
+                                with st.expander("Comentários"):
+                                    colunas_desejadas = ['data_sessao', 'observacoes']
+                                    df_comentarios = df_sessoes[colunas_desejadas]                                
+                                    st.dataframe(df_comentarios, use_container_width=True)
+
+                                st.subheader("Evolução de Massa Corporal")
+                                
+                                df_progresso = df_sessoes.groupby('data_sessao')[['massa']].mean().reset_index()
+
+                                st.bar_chart(df_progresso.set_index('data_sessao'))
 
 
                                 st.subheader("Acompanhamento por sessão")
@@ -186,6 +197,8 @@ def exibir_relatorio():
 
                                 st.line_chart(df_series_selecionada.set_index('tempo')['ponto_numeric'], use_container_width=True)
 
+
+                                
                             
                             else:
                                 st.warning("Nenhum exercício encontrado para as séries do paciente.")
