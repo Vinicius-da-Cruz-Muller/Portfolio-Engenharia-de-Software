@@ -221,28 +221,28 @@ def exibir_home():
         )
 
         st.markdown("<br><br>", unsafe_allow_html=True)    
-        clima = obter_clima(CIDADE, API_KEY)
+        # clima = obter_clima(CIDADE, API_KEY)
         
-        if clima:
-            temperatura = clima['main']['temp']
-            descricao = clima['weather'][0]['description']
-            icone = clima['weather'][0]['icon']
-            icone_url = f"http://openweathermap.org/img/wn/{icone}.png"
+        # if clima:
+        #     temperatura = clima['main']['temp']
+        #     descricao = clima['weather'][0]['description']
+        #     icone = clima['weather'][0]['icon']
+        #     icone_url = f"http://openweathermap.org/img/wn/{icone}.png"
 
-            st.markdown(
-            f"""
-            <div style="text-align: center; "background-color: #f0f0f0;">
-                <img src="{icone_url}" width="80">
-                <p><strong>Cidade:</strong> {CIDADE}</p>
-                <p><strong>Temperatura:</strong> {temperatura}°C</p>
-                <p><strong>Descrição:</strong> {descricao.capitalize()}</p>
-            </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        else:
-            st.error("Não foi possível obter os dados climáticos.")
+        #     st.markdown(
+        #     f"""
+        #     <div style="text-align: center; "background-color: #f0f0f0;">
+        #         <img src="{icone_url}" width="80">
+        #         <p><strong>Cidade:</strong> {CIDADE}</p>
+        #         <p><strong>Temperatura:</strong> {temperatura}°C</p>
+        #         <p><strong>Descrição:</strong> {descricao.capitalize()}</p>
+        #     </div>
+        #     </div>
+        #     """,
+        #     unsafe_allow_html=True,
+        # )
+        # else:
+        #     st.error("Não foi possível obter os dados climáticos.")
 
 
     st.markdown(

@@ -462,6 +462,22 @@ def pagina_consulta():
                         st.session_state.ponto = stage
                         counter += 1
 
+                    # Inicialize a flag na sessão do Streamlit (fora do loop)
+                    if "aviso_exibido" not in st.session_state:
+                        st.session_state.aviso_exibido = False
+
+                    # Verificar se o exercício é do tipo flexibilidade
+                    if dados_exercicio['tipo'] == 'Flexibilidade':
+                        # Verificar se o ângulo ultrapassa os limites
+                        if st.session_state.angle > angulo_maximo and not st.session_state.aviso_exibido:
+                            st.success(f"Você ultrapassou o ângulo máximo do exercício ({angulo_maximo}°)!")
+                            st.session_state.aviso_exibido = True  # Marcar que o aviso foi exibido
+                        elif st.session_state.angle < angulo_minimo and not st.session_state.aviso_exibido:
+                            st.success(f"Você ultrapassou o ângulo mínimo do exercício ({angulo_minimo}°)!")
+                            st.session_state.aviso_exibido = True  # Marcar que o aviso foi exibido
+                        elif st.session_state.angle >= angulo_minimo and st.session_state.angle <= angulo_maximo:
+                            st.session_state.aviso_exibido = False  # Resetar a flag quando o ângulo estiver dentro do limite
+
                     # Atualizar contadores na interface
                     # rep_counter.write(f'Contagem: {counter}')
                     stage_text.write(f'Estágio: {stage}')
