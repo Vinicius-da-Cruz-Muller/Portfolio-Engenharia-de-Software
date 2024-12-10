@@ -1,48 +1,104 @@
 # Portfólio Engenharia de Software
- Trabalho de Conclusão de Curso de Engenharia de Software, da Católica de Santa Catarina, a ser entregue no final do segundo semestre de 2024.
 
-<h2>Objetivo:</h2>
-<p>Desenvolver e validar uma ferramenta que utilize técnicas de visão computacional para analisar a execução de exercícios fisioterápicos. A ferramenta tem como objetivo principal auxiliar fisioterapeutas no acompanhamento e avaliação da evolução dos pacientes, fornecendo dados quantitativos e qualitativos sobre o desempenho do paciente em cada sessão.</p>
+Este projeto é parte do Trabalho de Conclusão de Curso de Engenharia de Software, apresentado à Católica de Santa Catarina, com entrega prevista para o final do segundo semestre de 2024 (10 de dezembro).
 
-<h2>Funcionalidades:</h2>
-<ul>
-<li>Captura e análise de vídeo: Capturar vídeos da execução dos exercícios, utilizando câmeras convencionais ou dispositivos móveis.</li>
-<li>Detecção e rastreamento de pontos-chave: Identificar e rastrear pontos-chave do corpo humano nos vídeos, como articulações e membros, para analisar a amplitude de movimento, alinhamento postural e outras métricas relevantes.</li>
-<li>Reconhecimento de padrões de movimento: Comparar os movimentos realizados pelo paciente com padrões de referência, identificando desvios e ineficiências.</li>
-<li>Reconhecimento de padrões de movimento: Comparar os movimentos realizados pelo paciente com padrões de referência, identificando desvios e ineficiências.</li>
-<li>Geração de relatórios: Gerar relatórios detalhados sobre o desempenho do paciente, incluindo métricas quantitativas (ângulos, distâncias, tempo) e qualitativas (descrição de movimentos, identificação de erros).</li>
-<li>Interface intuitiva: Desenvolver uma interface amigável para fisioterapeutas, permitindo a fácil configuração e utilização da ferramenta.</li>
-</ul>
+## Objetivo
+O objetivo do projeto é desenvolver e validar uma ferramenta baseada em visão computacional para a análise da execução de exercícios fisioterápicos. A ferramenta visa auxiliar fisioterapeutas no acompanhamento da evolução dos pacientes, fornecendo dados quantitativos e qualitativos que melhorem a personalização e a precisão do tratamento, ao mesmo tempo em que garante uma boa performance para atender às necessidades de tempo real e precisão na análise dos movimentos dos pacientes.
 
+## Motivação do Projeto
+A falta de ferramentas acessíveis e objetivas para medir o desempenho dos pacientes em sessões de fisioterapia pode levar a avaliações subjetivas e inconsistentes. Com a crescente demanda por soluções tecnológicas em saúde, o projeto busca preencher essa lacuna, oferecendo um sistema completo e confiável que agrega valor para profissionais e pacientes.
 
-<h2>Limitações:</h2>
-<ul>
- <li>Tipos de exercícios: Inicialmente, a ferramenta estará focada em um conjunto específico de exercícios, podendo ser expandida para outros tipos no futuro.</li>
- <li>Condições ambientais: A precisão da análise pode ser afetada por condições de iluminação, vestimentas do paciente e outros fatores ambientais.</li>
- <li>Variações individuais: A ferramenta levará em consideração as características individuais de cada paciente, mas pode não ser capaz de detectar todas as nuances do movimento humano.</li>
-</ul>
+## Funcionalidades
+- **Captura e análise de vídeo**: Utiliza câmeras para capturar e processar os movimentos do paciente em tempo real.
+- **Detecção de landmarks (pontos de referência)**: Emprega técnicas de visão computacional para rastrear articulações e movimentos utilizando o MediaPipe.
+- **Análise de padrões de movimento**: Identifica desvios ou limitações em comparação a padrões ideais.
+- **Geração de relatórios personalizados**: Produz relatórios detalhados com métricas como amplitude de movimento, tempo de execução e outras variáveis relevantes.
+- **Gestão de usuários**: Oferece login, gerenciamento de pacientes e histórico de sessões para acompanhamento contínuo.
+- **Mapas e informações correlatas**: Exibe localização dos pacientes ativos e informações climáticas.
 
+## Benefícios
+- **Aumento da precisão**: Fornecer dados objetivos e quantificáveis sobre o desempenho do paciente, reduzindo a subjetividade da avaliação manual.
+- **Personalização do tratamento**: Permitir a criação de planos de tratamento mais personalizados e eficazes.
 
-<h2>Público-alvo:</h2>
-<ul>
- <li>Fisioterapeutas de diversas especialidades.</li>
- <li>Clínicas e hospitais.</li>
- <li>Centros de reabilitação.</li>
- <li>Atletas e treinadores.</li>
-</ul>
+## Limitações
+- **Tipo de análise**: Inicialmente, a ferramenta estará focada em um número específico de ângulos, podendo ser expandida no futuro.
+- **Condições ambientais**: A precisão da análise pode ser afetada por condições de iluminação, qualidade da captura e processamento do dispositivo.
+- **Variações individuais**: A ferramenta levará em consideração as características individuais de cada paciente, mas pode não ser capaz de detectar todas as nuances do movimento humano.
 
-<h2>Benefícios:</h2>
-<ul>
- <li>Aumento da precisão: Fornecer dados objetivos e quantificáveis sobre o desempenho do paciente, reduzindo a subjetividade da avaliação manual.</li>
- <li>Melhora da eficiência: Automatizar tarefas repetitivas, liberando o fisioterapeuta para focar em atividades de maior valor agregado.</li>
- <li>Personalização do tratamento: Permitir a criação de planos de tratamento mais personalizados e eficazes.</li>
-</ul>
+## Público-alvo
+- Fisioterapeutas de diversas especialidades.
+- Clínicas e hospitais.
+- Centros de reabilitação.
+- Atletas e treinadores.
 
-<h3>Responder ao longo do desenvolvimento:</h3>
-<ul>
- <li>Metodologia de validação: Como validar a precisão e a confiabilidade da ferramenta?</li>
- <li>Dados: Quais tipos de dados serão coletados e como eles serão armazenados e protegidos?</li>
- <li>Integração com outros sistemas: Como a ferramenta se integrará com outros sistemas utilizados na clínica, como prontuários eletrônicos?</li>
- <li>Escalabilidade: Como a ferramenta pode ser expandida para atender a um número maior de usuários e tipos de exercícios?</li>
-</ul>
+## Requisitos Funcionais
+- **RF1**: Permitir que o paciente realize exercícios de fisioterapia monitorados por visão computacional, com auxílio profissional.
+- **RF2**: Fornecer feedback ao usuário sobre a qualidade da execução dos exercícios.
+- **RF3**: Permitir que o fisioterapeuta monitore o progresso do usuário, fornecendo relatórios detalhados sobre a evolução do paciente.
+- **RF4**: Ser acessível a pessoas com diferentes níveis de conhecimento técnico.
+- **RF5**: Fornecer sugestões de exercícios para a prescrição pelo profissional da saúde.
 
+## Requisitos Não Funcionais
+- **NF1**: A ferramenta deve ser segura e confiável, protegendo os dados dos pacientes.
+- **NF2**: A ferramenta deve ser eficiente e ter um bom desempenho.
+- **NF3**: A ferramenta deve ser fácil de usar e intuitiva.
+- **NF4**: A ferramenta deve ser escalável e modular, permitindo a adição de novas funcionalidades no futuro.
+- **NF5**: A ferramenta deve ser compatível com diferentes dispositivos e plataformas.
+- **NF6**: A ferramenta deve ser acessível a pessoas com deficiências (motoras).
+
+## Tecnologias Utilizadas
+- **MediaPipe**: Framework de visão computacional para detecção e rastreamento de landmarks no corpo humano.
+- **OpenCV**: Biblioteca de processamento de imagens e vídeos.
+- **Streamlit**: Framework de desenvolvimento de interfaces web interativas.
+- **FastAPI**: Framework para construção de APIs rápidas e eficientes.
+- **PostgreSQL e Psycopg2**: Banco de dados relacional para armazenar informações de usuários e sessões.
+- **Pandas e NumPy**: Bibliotecas para manipulação e análise de dados.
+- **Geopy e Folium**: Ferramentas para geocodificação e visualização de mapas interativos.
+
+## Requisitos do Projeto
+- **Python 3.10+**.
+- Instalação das dependências listadas no arquivo `requirements.txt`.
+- Banco de dados PostgreSQL configurado com as tabelas necessárias (descritas na documentação do projeto).
+- Ferramenta Git para controle de versão.
+- Ambiente de desenvolvimento local ou servidor para hospedagem das aplicações.
+
+## Arquitetura do Projeto
+- **Backend**: Desenvolvido com FastAPI, gerencia as rotas de API e o acesso ao banco de dados PostgreSQL.
+- **Frontend**: Interface de usuário construída em Streamlit, permite interatividade e visualização de dados.
+- **Camada de Visão Computacional**: Implementada com MediaPipe e OpenCV para análise dos vídeos e extração de landmarks.
+- **Banco de Dados**: PostgreSQL para armazenar informações de usuários, sessões e métricas.
+
+## Metodologia de Organização
+- **Kanban**: Utilizado para organização das tarefas no projeto, através da ferramenta Trello, monitorado com etiquetas como Fazer, Fazendo e Feito, e etapas como Backlog, Desenvolvimento e Validação.
+- **FDD (Feature-Driven Development)**: Aplicado para focar em funcionalidades específicas durante cada ciclo de desenvolvimento, de forma a agregar valor a cada nova entrega.
+
+## Guia para Novos Desenvolvedores:
+        1. **Clone o repositório:**  
+        ```
+        git clone https://github.com/Vinicius-da-Cruz-Muller/Portfolio-Engenharia-de-Software
+        ```
+        2. **Configure o ambiente virtual:**  
+        ```
+        python -m venv venv
+        source venv/bin/activate  # Linux/Mac
+        venv\Scripts\activate  # Windows
+        ```
+        3. **Instale as dependências:**  
+        ```
+        pip install -r requirements.txt
+        ```
+        4. **Configure o banco de dados PostgreSQL:**  
+        - Crie as tabelas utilizando os scripts disponíveis no repositório.
+        5. **Inicie o servidor FastAPI:**  
+        ```
+        uvicorn main:app --reload
+        ```
+        6. **Rode o frontend no Streamlit:**  
+        ```
+        streamlit run app.py --na guia pages
+        ```
+
+## Contato:
+- [Instagram](https://www.instagram.com/viniciuscmuller/)
+- [LinkedIn](https://www.linkedin.com/in/vin%C3%ADcius-da-cruz-muller-738784170/)
+- [GitHub](https://github.com/Vinicius-da-Cruz-Muller)
